@@ -1,26 +1,26 @@
-import React, { useContext } from "react";
-import { Context } from "../store/appContext";
-import rigoImageUrl from "../../img/rigo-baby.jpg";
+import React, { useContext, useState } from "react";
 import "../../styles/home.css";
+import HFAImage from "../../../../public/HFA.webp"
+import HFApng from "../../../../public/HFA.png"
+import AICpng from "../../../../public/AIC-logo.png"
 
 export const Home = () => {
-	const { store, actions } = useContext(Context);
-
+	
+  
 	return (
-		<div className="text-center mt-5">
-			<h1>Hello Rigo!!</h1>
-			<p>
-				<img src={rigoImageUrl} />
-			</p>
-			<div className="alert alert-info">
-				{store.message || "Loading message from the backend (make sure your python backend is running)..."}
-			</div>
-			<p>
-				This boilerplate comes with lots of documentation:{" "}
-				<a href="https://start.4geeksacademy.com/starters/react-flask">
-					Read documentation
-				</a>
-			</p>
+		<div className="home-container">
+		<h1 className="title">Bienvenido Selecciona tu rol</h1>
+		<div className="grid-container">
+		  <a href="/hfa" className="grid-item">
+		  <img src={HFAImage} alt="HFA Logo" className="grid-logo" />
+		  </a>
+		  <a href="/ohb" className="grid-item">
+		  <img src={HFApng} alt="HFA Logo" className="grid-logo" />
+		  </a>
+		  <a href="/hes" className="grid-item center-item">
+		  <img src={AICpng} alt="HFA Logo" className="grid-logo" />
+		  </a>
 		</div>
+	  </div>
 	);
-};
+  };

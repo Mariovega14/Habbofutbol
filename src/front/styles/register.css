@@ -1,0 +1,82 @@
+/* Estilos exclusivos para la página de registro */
+body{
+    background: url('https://i.pinimg.com/736x/a4/60/44/a46044ca13cff638a6223eadd3342ea0.jpg') no-repeat center center/cover;
+    backdrop-filter: blur(5px);
+    overflow: hidden; /* Oculta el scroll */
+    height: 100%;
+}
+
+.register-page {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+   
+}
+
+/* Contenedor principal exclusivo */
+.register-container {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    max-width: 400px;
+    color: white;
+}
+
+/* Título */
+.register-container h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #ffffff;
+}
+
+/* Inputs */
+.register-container input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+/* Botón */
+.register-container button {
+    background: #1e3c72;
+    color: rgb(255, 255, 255);
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 2px;
+}
+
+.register-container button:hover {
+    background: #16335a;
+}
+
+/* Texto para iniciar sesión */
+.register-container .login-text {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #ffffff;
+}
+
+.register-container .login-text span {
+    color: #f8b400; /* Color llamativo para el enlace */
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.register-container .login-text span:hover {
+    text-decoration: underline;
+    color: #ffcc00;
+}

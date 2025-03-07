@@ -1,0 +1,242 @@
+/* adminjugadores.css */
+
+/* Contenedor principal */
+.admin-players-container {
+    padding: 2rem;
+    max-width: 1400px; /* Más ancho para manejar más información */
+    margin: 0 auto;
+    font-family: 'Roboto', sans-serif; /* Fuente moderna y legible */
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-top: 50px;
+}
+
+/* Título */
+.admin-players-title {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 2rem;
+    font-size: 2.2rem;
+    font-weight: 600;
+}
+
+/* Barra de búsqueda y botón de creación */
+.admin-players-search-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.admin-players-search-input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.admin-players-search-input:focus {
+    border-color: #2c3e50;
+}
+
+.admin-players-create-button {
+    padding: 0.75rem 1.5rem;
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.admin-players-create-button:hover {
+    background-color: #34495e;
+}
+
+/* Selector de equipos */
+.admin-players-team-selector {
+    margin-bottom: 2rem;
+}
+
+.admin-players-team-selector label {
+    font-size: 1rem;
+    color: #2c3e50;
+    margin-right: 0.5rem;
+}
+
+.admin-players-team-selector select {
+    padding: 0.75rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.admin-players-team-selector select:focus {
+    border-color: #2c3e50;
+}
+
+/* Tabla de jugadores */
+.admin-players-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.admin-players-table th,
+.admin-players-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.admin-players-table th {
+    background-color: #2c3e50;
+    color: white;
+    font-weight: 600;
+    position: sticky;
+    top: 0; /* Cabecera fija para tablas largas */
+    z-index: 1;
+}
+
+.admin-players-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* Botones de acciones */
+.admin-players-edit-button,
+.admin-players-add-button,
+.admin-players-remove-button {
+    padding: 0.5rem 1rem;
+    margin-right: 0.5rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+    background-color: white;
+    color: #2c3e50;
+}
+
+.admin-players-edit-button:hover,
+.admin-players-add-button:hover,
+.admin-players-remove-button:hover {
+    background-color: #f5f5f5;
+}
+
+/* Paginación (opcional para grandes cantidades de datos) */
+.admin-players-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.admin-players-pagination button {
+    padding: 0.5rem 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background-color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    color: #2c3e50;
+}
+
+.admin-players-pagination button:hover {
+    background-color: #f5f5f5;
+}
+
+.admin-players-pagination button.active {
+    background-color: #2c3e50;
+    color: white;
+    border-color: #2c3e50;
+}
+
+/* Modal */
+.admin-players-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.admin-players-modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 400px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.admin-players-modal-content h3 {
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.admin-players-modal-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.admin-players-modal-input:focus {
+    border-color: #2c3e50;
+}
+
+.admin-players-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.admin-players-modal-cancel,
+.admin-players-modal-save {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    background-color: white;
+    color: #2c3e50;
+}
+
+.admin-players-modal-cancel:hover,
+.admin-players-modal-save:hover {
+    background-color: #f5f5f5;
+}
+
+/* Mensajes de error y éxito */
+.admin-players-error {
+    color: #e74c3c;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.admin-players-success {
+    color: #27ae60;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}

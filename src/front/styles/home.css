@@ -1,7 +1,73 @@
-/*
-    home.css: This website contains selectors only used in home.css
+/* Contenedor principal */
+.home-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100vw;
+    text-align: center;
+ /* Fondo oscuro para resaltar los elementos */
+}
 
-    All pages share the styles on index.css but you should create 
-    one more css for each page that will contain the selected used 
-    on that page only (the ones not reused in other pages).
-*/
+/* Título */
+.title {
+    font-size: 2.5rem;
+    color: white;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 10px rgba(255, 255, 255, 0.3);
+}
+
+/* Contenedor de imágenes */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto auto;
+    gap: 40px;
+    width: 600px;
+    max-width: 600px;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Estilos para cada caja de imagen */
+.grid-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    background: transparent;
+    width: 280px;
+    height: 280px;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Efecto hover en imágenes */
+.grid-item:hover {
+    transform: scale(1.1);
+    box-shadow: 0px 8px 20px rgba(255, 255, 255, 0.3);
+}
+
+/* Último elemento ocupa dos columnas para quedar centrado */
+.center-item {
+    grid-column: span 2;
+    justify-self: center;
+}
+
+/* Estilo de las imágenes */
+.grid-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+/* Efecto hover en imágenes (movimiento sutil) */
+.grid-item:hover .grid-logo {
+    transform: rotate(3deg) scale(1.05);
+}
