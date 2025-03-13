@@ -10,18 +10,19 @@ const Equipos = () => {
   const [ligaFiltro, setLigaFiltro] = useState("");
   const [modalidadFiltro, setModalidadFiltro] = useState("");
   const [busqueda, setBusqueda] = useState("");
-
-  // Estado para el modal
   const [showEquipoModal, setShowEquipoModal] = useState(false);
   const [nombreEquipo, setNombreEquipo] = useState("");
   const [torneoId, setTorneoId] = useState("");
+
+  // ✅ Estado para el modal de confirmación de eliminación
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [equipoAEliminar, setEquipoAEliminar] = useState(null);
 
   useEffect(() => {
     actions.getTorneos();
     actions.getEquipos();
   }, []);
 
-  // Filtrar equipos según la liga y modalidad seleccionadas
   const equiposFiltrados = store.equipos.filter((equipo) => {
     const torneo = store.torneos.find((t) => t.id === equipo.torneo_id);
     if (!torneo) return false;
@@ -33,16 +34,45 @@ const Equipos = () => {
     return coincideLiga && coincideModalidad && coincideBusqueda;
   });
 
-  // Función para crear un equipo
-  const handleCrearEquipo = () => {
+  // ✅ Mostrar modal de confirmación para eliminar equipo
+  const confirmarEliminacion = (equipo) => {
+    setEquipoAEliminar(equipo);
+    setShowDeleteModal(true);
+  };
+
+  // ✅ Eliminar equipo después de confirmación
+  const eliminarEquipo = async () => {
+    if (equipoAEliminar) {
+      const resultado = await actions.eliminarEquipo(equipoAEliminar.id);
+      if (resultado) {
+        actions.getEquipos(); // Refrescar lista
+      }
+      setShowDeleteModal(false);
+      setEquipoAEliminar(null);
+    }
+  };
+
+  // ✅ Crear equipo
+  const handleCrearEquipo = async () => {
     if (!nombreEquipo.trim() || !torneoId) {
       alert("Por favor, completa todos los campos.");
       return;
     }
 
-    actions.agregarEquipo(nombreEquipo, torneoId);
-    setShowEquipoModal(false); // Cerrar modal
-    setNombreEquipo(""); // Limpiar el campo
+    const resultado = await actions.crearEquipo({
+      nombre: nombreEquipo,
+      torneo_id: torneoId,
+    });
+
+    if (resultado.success) {
+      alert("Equipo creado exitosamente");
+      actions.getEquipos(); // Refrescar lista
+    } else {
+      alert(resultado.message);
+    }
+
+    setShowEquipoModal(false);
+    setNombreEquipo("");
     setTorneoId("");
   };
 
@@ -71,7 +101,12 @@ const Equipos = () => {
           <option value="HFA">HFA</option>
           <option value="HES">HES</option>
         </select>
-        <input type="text" placeholder="Buscar equipo..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+        <input
+          type="text"
+          placeholder="Buscar equipo..."
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+        />
       </div>
 
       <div className="crear-equipo">
@@ -98,7 +133,7 @@ const Equipos = () => {
                     <td>{torneo ? torneo.nombre : "Desconocido"}</td>
                     <td>{torneo ? torneo.modalidad : "Desconocido"}</td>
                     <td>
-                      <button className="btn-eliminar" onClick={() => actions.eliminarEquipo(equipo.id)}>
+                      <button className="btn-eliminar" onClick={() => confirmarEliminacion(equipo)}>
                         Eliminar
                       </button>
                     </td>
@@ -114,7 +149,21 @@ const Equipos = () => {
         </table>
       </div>
 
-      {/* MODAL PARA CREAR EQUIPO */}
+      {/* ✅ MODAL PARA CONFIRMAR ELIMINACIÓN */}
+      {showDeleteModal && equipoAEliminar && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>¿Estás seguro?</h2>
+            <p>¿Quieres eliminar el equipo <strong>{equipoAEliminar.nombre}</strong>? Esta acción no se puede deshacer.</p>
+            <div className="modal-buttons">
+              <button className="btn-confirmar" onClick={eliminarEquipo}>Sí, eliminar</button>
+              <button className="btn-cerrar" onClick={() => setShowDeleteModal(false)}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ✅ MODAL PARA CREAR EQUIPO */}
       {showEquipoModal && (
         <div className="modal">
           <div className="modal-content">

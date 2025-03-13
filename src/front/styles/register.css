@@ -1,7 +1,7 @@
 /* Estilos exclusivos para la página de registro */
-body{
-    background: url('https://i.pinimg.com/736x/a4/60/44/a46044ca13cff638a6223eadd3342ea0.jpg') no-repeat center center/cover;
-    backdrop-filter: blur(5px);
+body {
+    background: url('https://res.cloudinary.com/dxsey90nb/image/upload/v1741900125/r0wjyh9p3jr3mvf77htv.png') 
+                no-repeat center top 60px / cover;
     overflow: hidden; /* Oculta el scroll */
     height: 100%;
 }

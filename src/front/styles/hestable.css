@@ -1,0 +1,79 @@
+/* 🌍 Fondo con un estilo profesional */
+.hes-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80vh;
+  background: transparent;
+  color: white;
+  font-family: "Arial", sans-serif;
+}
+
+/* 📌 Encabezado minimalista */
+.hes-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.hes-header h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #f4f4f4;
+}
+
+.hes-grid {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  width: 90%;
+  max-width: 1400px;
+}
+
+
+
+.hes-card {
+  background: #1e1e1e;
+  padding: 25px;
+  border-radius: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  flex: 1;
+  max-width: 320px; /* Evita que se estiren demasiado en pantallas grandes */
+  min-width: 250px;
+}
+
+.hes-card h2 {
+  font-size: 1.8rem;
+  color: #f4f4f4;
+  margin-bottom: 10px;
+}
+
+.hes-card p {
+  font-size: 1rem;
+  color: #bbb;
+}
+
+/* 🔥 Efecto al pasar el mouse */
+.hes-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0px 4px 15px rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* 🎨 Colores únicos para cada tarjeta */
+.hes-ranking { border-left: 5px solid #ffcc00; }
+.hes-foro { border-left: 5px solid #0099ff; }
+.hes-convocatorias { border-left: 5px solid #ff3333; }
+.hes-equipos { border-left: 5px solid #33cc66; }
+
+/* 📱 Responsividad */
+@media (max-width: 768px) {
+  .hes-grid {
+    grid-template-columns: 1fr;
+  }
+}
