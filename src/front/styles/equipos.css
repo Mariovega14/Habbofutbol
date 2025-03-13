@@ -151,3 +151,61 @@
 .btn-cerrar:hover {
     background: #c82333;
 }
+
+.actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+/* 🔹 Agrupar las acciones */
+.action-group {
+    display: flex;
+    gap: 8px;
+}
+
+/* 🎯 Botón de quitar equipo */
+.btn-remove-team {
+    background: #ffcc00;
+    color: black;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn-remove-team:hover {
+    background: #e6b800;
+}
+
+/* 🎯 Botón de eliminar jugador */
+.btn-remove-player {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn-remove-player:hover {
+    background: #c0392b;
+}
+
+/* 🎯 Botón de editar */
+.btn-edit-player {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn-edit-player:hover {
+    background: #2980b9;
+}

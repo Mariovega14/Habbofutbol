@@ -6,15 +6,23 @@ import Register from "./pages/Register.jsx"
 import Attendance from "./pages/Attendance.jsx"
 import AdminDashboard from "./pages/Admindashboard.jsx"
 import AdminJugadores from "./pages/AdminJugadores.jsx"
+import Hestable from "./pages/Hestable.jsx"
+import AicDashboard from "./pages/AicDashboard.jsx"
+import OhbDashboard from "./pages/OhbDashboard.jsx"
+import RegistroPartido from "./pages/RegistroPartido.jsx";
+import HFADashboard from "./pages/HfaDashboard.jsx";
 import Equipos from "./pages/Equipos.jsx"
 import CrearTorneo from "./pages/CrearTorneo.jsx"
 import Login from "./pages/Login.jsx"
+import EquiposModalidad from "./component/EquiposModalidad.jsx";
 import { Home } from "./pages/home";
 import { Demo } from "./pages/demo";
 import { Single } from "./pages/single";
 import injectContext from "./store/appContext";
 
 import { Navbar } from "./component/navbar";
+
+
 
 
 //create your first component
@@ -35,10 +43,16 @@ const Layout = () => {
                         <Route element={<Register />} path="/register" />
                         <Route element={<Login />} path="/login" />
                         <Route element={<Attendance />} path="/asistencia" />
+                        <Route element={<RegistroPartido />} path="/arbitraje" />
                         <Route element={<AdminDashboard />} path="/admin" />
                         <Route element={<AdminJugadores />} path="/admin/jugadores" />
                         <Route element={<CrearTorneo />} path="/admin/torneos" />
                         <Route element={<Equipos />} path="/admin/equipos" />
+                        <Route element={<Hestable />} path="/hes" />
+                        <Route element={<AicDashboard />} path="/aic" />
+                        <Route element={<HFADashboard />} path="/hfa" />
+                        <Route element={<OhbDashboard />} path="/ohb" />
+                        <Route element={<EquiposModalidad />} path="/:modalidad/equipos" />
                         <Route element={<Demo />} path="/demo" />
                         <Route element={<Single />} path="/single/:theid" />
                         <Route element={<h1>Not found!</h1>} />

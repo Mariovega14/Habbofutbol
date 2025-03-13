@@ -4,7 +4,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
+    height: 90vh;
     width: 100vw;
     text-align: center;
  /* Fondo oscuro para resaltar los elementos */
@@ -54,10 +54,7 @@
 }
 
 /* Último elemento ocupa dos columnas para quedar centrado */
-.center-item {
-    grid-column: span 2;
-    justify-self: center;
-}
+
 
 /* Estilo de las imágenes */
 .grid-logo {
@@ -71,3 +68,76 @@
 .grid-item:hover .grid-logo {
     transform: rotate(3deg) scale(1.05);
 }
+
+.extra-buttons {
+    position: fixed;
+    top: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    z-index: 1000;
+    padding: 0 20px;
+    margin-top: 370px;
+    background: white;
+    color: black;
+  }
+  
+  .extra-button {
+    background-color: white;
+    color: black;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 50px;
+    text-transform: uppercase;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  
+  
+  
+  .extra-button:hover::before {
+    width: 0;
+    height: 0;
+  }
+  
+  .extra-button:hover {
+    transform: rotate(-5deg) scale(1.1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .extra-button:first-child {
+    position: fixed;
+    left: 120px; /* Movido más a la derecha */
+    animation: wiggle 2s infinite;
+  }
+  
+  .extra-button:last-child {
+    position: fixed;
+    right: 120px; /* Movido más a la izquierda */
+    animation: float 3s infinite;
+  }
+  
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-3deg); }
+    50% { transform: rotate(3deg); }
+    75% { transform: rotate(-3deg); }
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  
+
+  .home-logo {
+    margin-bottom: 40px;
+    margin-left: 10px;
+    width: 200px;  /* Ajusta el tamaño según lo que necesites */
+    height: auto; /* Mantiene la proporción */
+  }

@@ -1,0 +1,103 @@
+/* Contenedor principal */
+.equipos-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 25px;
+    background: #1c1c2e;
+    border-radius: 12px;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    color: #ffffff;
+}
+
+/* Título principal */
+.titulo {
+    font-size: 28px;
+    font-weight: bold;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #ffcc70, #ff6699);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 20px;
+}
+
+/* Lista de equipos */
+.equipos-lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 15px;
+    padding: 0;
+    list-style: none;
+    justify-content: center;
+}
+
+/* Estilo de cada equipo */
+.equipo {
+    background: linear-gradient(135deg, #2a2a4a, #1e1e38);
+    padding: 15px;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    border: 2px solid transparent;
+}
+
+.equipo:hover {
+    transform: scale(1.05);
+    border-color: #ff6699;
+}
+
+/* Equipo seleccionado */
+.equipo.seleccionado {
+    background: linear-gradient(135deg, #ff6699, #ffcc70);
+    color: #1e1e2f;
+    border-color: #ffffff;
+}
+
+/* Contenedor de jugadores */
+.jugadores-container {
+    margin-top: 30px;
+    padding: 20px;
+    background: #252545;
+    border-radius: 10px;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Título de jugadores */
+.jugadores-container h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffcc70;
+}
+
+/* Lista de jugadores */
+.jugadores-lista {
+    list-style: none;
+    padding: 0;
+}
+
+.jugadores-lista li {
+    background: #373757;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffcc70;
+    transition: background 0.3s ease-in-out;
+}
+
+.jugadores-lista li:hover {
+    background: #505078;
+}
+
+/* Mensaje de "No hay jugadores" */
+.jugadores-container p {
+    color: #ff6699;
+    font-weight: bold;
+    font-size: 18px;
+}

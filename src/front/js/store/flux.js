@@ -4,9 +4,9 @@ const getState = ({ getStore, getActions, setStore }) => {
             token: localStorage.getItem("token") || null,
             role: localStorage.getItem("role") || null,
             jugadores: [],
-            jugadoresEquipo: [],
             torneos: [],
             equipos: [],
+            partidos: [],
             asistencias: [] // Nuevo estado para las asistencias
         },
         actions: {
@@ -139,7 +139,8 @@ const getState = ({ getStore, getActions, setStore }) => {
                     const data = await response.json();
 
                     if (response.ok) {
-                        setStore({ asistencias: data.reverse() }); // Ordenamos de más reciente a más antigua
+                        setStore({ asistencias: data.reverse() });
+
                     } else {
                         console.error("Error al obtener asistencias:", data.message);
                     }
@@ -148,34 +149,40 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
-            getJugadores: async () => { // Cambiado de "getPlayers" a "getJugadores"
+            getJugadores: async () => {
                 try {
-                    const token = localStorage.getItem("token"); // Obtener el token de autenticación
+                    const token = localStorage.getItem("token");
                     if (!token) {
                         console.error("No hay token disponible");
                         return;
                     }
 
-                    const resp = await fetch(process.env.BACKEND_URL + "/admin/players", {
+                    const resp = await fetch(`${process.env.BACKEND_URL}/admin/players`, {
                         method: "GET",
                         headers: {
                             "Content-Type": "application/json",
-                            Authorization: `Bearer ${token}`, // Incluir el token en la petición
+                            Authorization: `Bearer ${token}`,
                         },
                     });
 
                     if (!resp.ok) {
-                        console.error("Error al obtener los jugadores");
+                        const errorData = await resp.json().catch(() => ({})); // Manejar errores en JSON
+                        console.error(`Error al obtener los jugadores: ${resp.status} - ${errorData.error || "Error desconocido"}`);
+                        setStore({ jugadores: [] });
                         return;
                     }
 
                     const data = await resp.json();
-                    setStore({ jugadores: data || [] }); // Cambiado de "players" a "jugadores"
+                    setStore({ jugadores: data || [] });
+
                 } catch (error) {
                     console.error("Error en getJugadores:", error);
-                    setStore({ jugadores: [] }); // En caso de error, inicializa jugadores como un array vacío
+                    setStore({ jugadores: [] });
                 }
             },
+
+
+
 
             updatePlayerNick: async (playerId, newNick) => {
                 try {
@@ -226,7 +233,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 
                     if (response.ok) {
                         getActions().obtenerAsistencias(); // Refrescamos la lista después de registrar
-                        return { success: true, message: "Asistencia registrada correctamente" };
+                        return { success: true, message: "Registrada Correctamente" };
                     } else {
                         return { success: false, message: data.message || "No se pudo registrar la asistencia" };
                     }
@@ -268,25 +275,6 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
-            eliminarEquipo: async (equipoId) => {
-                try {
-                    const response = await fetch(process.env.BACKEND_URL + `/equipos/${equipoId}`, {
-                        method: "DELETE",
-                        headers: {
-                            "Content-Type": "application/json"
-                        }
-                    });
-
-                    if (!response.ok) {
-                        throw new Error("Error al eliminar el equipo");
-                    }
-
-                    return true;
-                } catch (error) {
-                    console.error("Error:", error);
-                    return false;
-                }
-            },
 
             eliminarEquipo: async (equipoId) => {
                 try {
@@ -308,59 +296,241 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
+            removePlayerFromTeam: async (playerId, teamId) => {
+                try {
+                    console.log("Intentando eliminar equipo:", { playerId, teamId }); // 🛠 Depuración
+            
+                    const response = await fetch(process.env.BACKEND_URL + "/remove_team", {
+                        method: "DELETE",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ player_id: playerId, team_id: teamId })
+                    });
+            
+                    if (!response.ok) throw new Error("Error al eliminar el equipo.");
+            
+                    const data = await response.json();
+                    console.log("Equipo eliminado:", data); // 🛠 Depuración
+            
+                    getActions().getJugadores(); // Actualiza la lista de jugadores
+                    return data;
+                } catch (error) {
+                    console.error("Error al eliminar equipo:", error);
+                }
+            },
+            
+            
+
+
+            addPlayerToTeam: async (jugadorId, equipoId) => {
+                try {
+                    const token = localStorage.getItem("token"); // Obtener token JWT
+                    const response = await fetch(`${process.env.BACKEND_URL}/admin/players/add_team`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({
+                            jugador_id: jugadorId,
+                            equipo_id: equipoId
+                        }),
+                    });
+            
+                    const data = await response.json();
+            
+                    if (!response.ok) {
+                        throw new Error(data.error || "Error al añadir jugador al equipo");
+                    }
+            
+                    alert("Jugador añadido correctamente");
+                    return data;
+                } catch (error) {
+                    console.error("Error al añadir jugador al equipo:", error);
+                    alert("Error al añadir jugador");
+                }
+            },
+                        
+
+
+
+            eliminarTorneo: async (torneoId) => {
+                try {
+                    const token = localStorage.getItem("token"); // 🔐 Obtén el token de autenticación
+                    if (!token) {
+                        console.error("No hay token disponible");
+                        return false;
+                    }
+
+                    const response = await fetch(`${process.env.BACKEND_URL}/torneos/${torneoId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}` // 🔐 Envía el token en la petición
+                        },
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Error al eliminar el torneo');
+                    }
+
+                    console.log(`Torneo ${torneoId} eliminado correctamente`);
+                    getActions().getTorneos(); // Recargar la lista de torneos
+
+                    return true;
+                } catch (error) {
+                    console.error('Error:', error);
+                    return false;
+                }
+            }, 
+
+            
+            deletePlayer: async (playerId) => {
+                try {
+                    const token = localStorage.getItem("token");
+                    if (!token) {
+                        return { success: false, message: "No estás autenticado" };
+                    }
+
+                    const response = await fetch(`${process.env.BACKEND_URL}/jugadores/${playerId}`, {
+                        method: "DELETE",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+
+                    const data = await response.json();
+                    console.log("Respuesta del servidor:", data);
+
+                    if (!response.ok) {
+                        console.error("Error en deletePlayer:", data.message);
+                        return { success: false, message: data.message || "Error desconocido" };
+                    }
+
+                    return { success: true, message: "Jugador eliminado correctamente" };
+
+                } catch (error) {
+                    console.error("Error en deletePlayer:", error);
+                    return { success: false, message: "Error de conexión con el servidor" };
+                }
+            },
+
+            registrarPartido: async (partidoData) => {
+                try {
+                    const response = await fetch(process.env.BACKEND_URL + "/partidos", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${localStorage.getItem("token")}`,
+                        },
+                        body: JSON.stringify(partidoData),
+                    });
+
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || "Error al registrar el partido");
+
+                    console.log("Partido registrado con éxito:", data);
+                    return { success: true, message: "Partido registrado correctamente" };
+                } catch (error) {
+                    console.error("Error al registrar el partido:", error);
+                    return { success: false, message: error.message };
+                }
+            },
+
+
+            getEquiposPorTorneo: async (torneoId) => {
+                try {
+                    const response = await fetch(process.env.BACKEND_URL + `/equipos/torneo/${torneoId}`);
+                    if (!response.ok) throw new Error("Error al obtener los equipos");
+                    const data = await response.json();
+                    setStore({ equipos: data });
+                    return data;
+                } catch (error) {
+                    console.error("Error al cargar los equipos del torneo:", error);
+                    return [];
+                }
+            },
+
+
+            registrarPartido: async (partidoData) => {
+                try {
+                    const token = localStorage.getItem("token");
+                    if (!token) throw new Error("No hay token disponible");
+
+                    console.log("📤 Enviando datos al backend:", JSON.stringify(partidoData, null, 2));
+
+                    const response = await fetch(process.env.BACKEND_URL + "/partidos", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        },
+                        body: JSON.stringify(partidoData)  // 🔥 Asegurar que se envía como JSON
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        console.error("❌ Error del backend:", errorData);
+                        throw new Error(errorData.error || "Error al registrar el partido");
+                    }
+
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error("❌ Error al registrar el partido:", error);
+                    return { success: false, message: error.message };
+                }
+            },
+
+
+
+
+            getPartidos: async () => {
+                try {
+                    const response = await fetch(process.env.BACKEND_URL + "/partidos");
+                    if (!response.ok) throw new Error("Error al obtener los partidos");
+                    const data = await response.json();
+                    setStore({ partidos: data });
+                    return data;
+                } catch (error) {
+                    console.error("Error al cargar los partidos:", error);
+                    return [];
+                }
+            },
+
             getJugadoresPorEquipo: async (equipoId) => {
                 try {
-                    const response = await fetch(`${process.env.BACKEND_URL}/equipos/${equipoId}/jugadores`);
-                    if (!response.ok) throw new Error('Error al obtener jugadores');
+                    console.log("Solicitando jugadores para equipo:", equipoId);
+                    const response = await fetch(process.env.BACKEND_URL + `/equipos/${equipoId}/jugadores`);
+                    if (!response.ok) throw new Error("Error al obtener los jugadores");
+
                     const data = await response.json();
+                    console.log("Jugadores recibidos:", data); // Verifica en consola
 
-                    set({ jugadoresEquipo: data });
-                    return { success: true };
+                    setStore({ jugadores: data });
+                    return data;
                 } catch (error) {
-                    console.error(error);
-                    return { success: false };
+                    console.error("Error al cargar los jugadores del equipo:", error);
+                    return [];
                 }
             },
 
-            agregarJugadorAEquipo: async (equipoId, jugadorId) => {
+            obtenerEquiposPorModalidad: async (modalidad) => {
                 try {
-                  const response = await fetch(`${process.env.BACKEND_URL}/equipos/${equipoId}/jugadores`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ jugador_id: jugadorId }),
-                  });
-              
-                  if (response.ok) {
-                    // Recargar jugadores del equipo después de agregar
-                    await getActions().getJugadoresPorEquipo(equipoId);
-                    return { success: true };
-                  } else {
-                    return { success: false };
-                  }
+                    const resp = await fetch(`${process.env.BACKEND_URL}/${modalidad}/equipos`);
+                    if (!resp.ok) throw new Error("Error al obtener los equipos");
+
+                    const data = await resp.json();
+                    setStore({ equipos: data });
                 } catch (error) {
-                  console.error('Error agregando jugador al equipo:', error);
-                  return { success: false };
+                    console.error("Error:", error);
                 }
-              },
-              
-              eliminarJugadorDeEquipo: async (equipoId, jugadorId) => {
-                try {
-                  const response = await fetch(`${process.env.BACKEND_URL}/equipos/${equipoId}/jugadores/${jugadorId}`, {
-                    method: 'DELETE',
-                  });
-              
-                  if (response.ok) {
-                    // Recargar jugadores del equipo después de eliminar
-                    await getActions().getJugadoresPorEquipo(equipoId);
-                    return { success: true };
-                  } else {
-                    return { success: false };
-                  }
-                } catch (error) {
-                  console.error('Error eliminando jugador del equipo:', error);
-                  return { success: false };
-                }
-            },
+            }
+
+
+
         }
     };
 };

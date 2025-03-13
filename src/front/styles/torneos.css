@@ -1,136 +1,124 @@
-/* Contenedor principal */
+/* 📌 Contenedor general */
 .torneos-container {
-    max-width: 900px;
-    margin: 20px auto;
+    font-family: "Arial", sans-serif;
+    max-width: 1400px;
+    margin: auto;
     padding: 20px;
-    background-color: #f4f4f4;
+    background: #1e1e2f;
+    color: #ffffff;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 40px;
     text-align: center;
 }
 
-/* Título */
-.torneos-container h1 {
-    font-size: 26px;
-    color: #333;
+/* 🏆 Título */
+.torneos-title {
+    font-size: 2rem;
     margin-bottom: 20px;
 }
 
-/* Botón para crear torneos */
-.crear-torneo-btn {
-    background-color: #007bff;
+/* 🎯 Botón flotante */
+.fab-button {
+    background: #28a745;
     color: white;
-    border: none;
     padding: 12px 18px;
+    border: none;
+    border-radius: 50px;
     font-size: 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.3s ease-in-out;
-}
-
-.crear-torneo-btn:hover {
-    background-color: #0056b3;
-}
-
-/* Lista de torneos */
-.torneos-list {
-    margin-top: 20px;
-}
-
-.modalidad-section {
-    background: white;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.modalidad-section h2 {
-    color: #007bff;
-    font-size: 22px;
-    margin-bottom: 10px;
-}
-
-.torneo-item {
-    list-style: none;
-    padding: 10px;
-    background: #e9ecef;
-    margin: 5px 0;
-    border-radius: 5px;
-    font-size: 16px;
-}
-
-/* Modal */
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    font-weight: bold;
     display: flex;
     align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.fab-button:hover {
+    background: #218838;
+    transform: scale(1.05);
+}
+
+/* 📌 Contenedor de torneos con scroll */
+.torneos-grid {
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+/* 🎯 Estiliza el scrollbar */
+.torneos-grid::-webkit-scrollbar {
+    width: 8px;
+}
+
+.torneos-grid::-webkit-scrollbar-thumb {
+    background: #007bff;
+    border-radius: 4px;
+}
+
+.torneos-grid::-webkit-scrollbar-thumb:hover {
+    background: #0056b3;
+}
+
+/* 📌 Modalidades */
+.modalidad-section {
+    margin-bottom: 30px;
+}
+
+.modalidad-title {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #ffcc00;
+}
+
+/* 📌 Tarjetas de torneos */
+.torneos-cards {
+    display: flex;
+    gap: 12px; /* 🔹 Reduce el espacio entre tarjetas para mejor distribución */
+    flex-wrap: wrap;
     justify-content: center;
 }
 
-.modal-content {
-    background: white;
-    padding: 20px;
+.torneo-card {
+    background: #2e2e42;
+    padding: 15px;
     border-radius: 8px;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     text-align: center;
-    position: relative;
+    width: 250px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+    position: relative; /* ✅ Para posicionar la "X" de eliminar */
 }
 
-.modal-content h2 {
-    margin-bottom: 15px;
-    font-size: 22px;
+.torneo-card:hover {
+    transform: translateY(-5px);
 }
 
-/* Botón de cerrar modal */
-.close {
+.torneo-card h3 {
+    font-size: 1.3rem;
+    color: #ffffff;
+}
+
+.torneo-card p {
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+/* 📌 Botón de eliminar en la esquina superior derecha */
+.delete-icon {
     position: absolute;
     top: 10px;
-    right: 15px;
-    font-size: 20px;
+    right: 10px;
+    color: #e74c3c;
     cursor: pointer;
-    color: #333;
+    transition: 0.3s;
 }
 
-.close:hover {
-    color: red;
+.delete-icon:hover {
+    color: #c0392b;
+    transform: scale(1.1);
 }
 
-/* Estilos para los inputs y selects */
-.modal-content input,
-.modal-content select {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 14px;
-}
-
-/* Botón del formulario */
-.modal-content button {
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 10px;
-    width: 100%;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s ease-in-out;
-    font-size: 16px;
-}
-
-.modal-content button:hover {
-    background: #218838;
-}
-
+/* 📌 Fondo del modal */
 .modal {
     position: fixed;
     top: 0;
@@ -139,31 +127,138 @@
     height: 100%;
     background: rgba(0, 0, 0, 0.6);
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
+/* 📌 Contenedor del modal */
 .modal-content {
-    background: #252535;
-    padding: 20px;
-    border-radius: 8px;
+    background: #2e2e42;
+    padding: 2rem;
+    border-radius: 12px;
     width: 400px;
     text-align: center;
-    color: white;
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    animation: fadeIn 0.25s ease-in-out;
 }
 
-.modal-content h2 {
+/* 📌 Animación del modal */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* 📌 Botón de cerrar en modal */
+.close-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    color: #ff6b6b;
+    font-size: 24px;
+    transition: 0.3s;
+}
+
+.close-icon:hover {
+    color: #ff3b3b;
+}
+
+/* 📌 Estilos para los inputs y selects */
+.form-group {
     margin-bottom: 15px;
+    text-align: left;
 }
 
-.modal input,
-.modal select {
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select {
     width: 100%;
     padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
     border: none;
-    background: #333;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #3e3e5a;
     color: white;
+    outline: none;
+    transition: background 0.3s ease;
 }
 
+.form-group input:focus,
+.form-group select:focus {
+    background: #4e4e6a;
+}
+
+/* 📌 Botón para enviar */
+.btn-crear {
+    background: #007bff;
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background 0.3s ease, transform 0.2s ease;
+    display: block;
+    width: 100%;
+}
+
+.btn-crear:hover {
+    background: #0056b3;
+    transform: scale(1.05);
+}
+
+/* 📌 Contenedor de los botones del modal */
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+/* 📌 Botón de eliminar en el modal */
+.btn-confirmar {
+    background: #e74c3c;
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.btn-confirmar:hover {
+    background: #c0392b;
+    transform: scale(1.05);
+}
+
+/* 📌 Botón de cancelar */
+.btn-cerrar {
+    background: #95a5a6;
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.btn-cerrar:hover {
+    background: #7f8c8d;
+    transform: scale(1.05);
+}

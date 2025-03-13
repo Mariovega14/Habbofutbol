@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Context } from "../store/appContext";
 import { User, Newspaper, LogOut, LogIn, UserPlus, Shield } from "lucide-react"; // Importamos iconos
 import "../../styles/navbar.css";
+import logohf from "../../../../public/logohf.gif";
 
 export const Navbar = () => {
   const { store, actions } = useContext(Context);
@@ -35,7 +36,9 @@ export const Navbar = () => {
 
   return (
     <nav className="navbar">
-      <h1 className="navbar-title" onClick={() => navigate("/")}>Habbofutbol</h1>
+      <a href="/">
+  <img src={logohf} alt="Habbofutbol" className="navbar-logo" />
+</a>
       <button className="menu-btn" ref={buttonRef} onClick={toggleMenu}>
         ⋮
       </button>

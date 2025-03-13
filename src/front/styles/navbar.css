@@ -69,3 +69,10 @@
 .logout:hover {
   background: #ffe5e5;
 }
+
+.navbar-logo {
+  margin-left: 10px;
+  width: 65px;  /* Ajusta el tamaño según lo que necesites */
+  height: auto; /* Mantiene la proporción */
+}
+
