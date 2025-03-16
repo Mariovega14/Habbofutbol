@@ -37,7 +37,8 @@ class Equipo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False, unique=True)
     torneo_id = db.Column(db.Integer, db.ForeignKey('torneos.id'), nullable=False)
-    
+    logo_url = db.Column(db.String(255), nullable=True)
+
     jugadores_equipos = db.relationship("JugadorEquipo", back_populates="equipo", lazy="joined")
 
 # 🔹 Modelo de Jugadores
@@ -74,7 +75,7 @@ class Partido(db.Model):
     equipo_a_id = db.Column(db.Integer, db.ForeignKey('equipos.id'), nullable=False)
     equipo_b_id = db.Column(db.Integer, db.ForeignKey('equipos.id'), nullable=False)
     fecha = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    estado = db.Column(db.String(20), default="pendiente")  
+    estado = db.Column(db.String(20), default="finalizado")  
     juez = db.Column(db.String(100), nullable=True)
     goles_equipo_a = db.Column(db.Integer, default=0)
     goles_equipo_b = db.Column(db.Integer, default=0)
@@ -95,6 +96,8 @@ class EstadisticaJugador(db.Model):
     goles = db.Column(db.Integer, default=0)
     asistencias = db.Column(db.Integer, default=0)
     autogoles = db.Column(db.Integer, default=0)
+
+    jugador = db.relationship("Jugador", backref="estadisticas")
 
 # 🔹 Modelo de Asistencia
 class Asistencia(db.Model):

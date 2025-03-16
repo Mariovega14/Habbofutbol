@@ -64,7 +64,7 @@ const Attendance = () => {
                             <tr key={asistencia.id}>
                                 <td>{asistencia.nombre}</td>
                                 <td>{asistencia.fecha_hora}</td>
-                                {esAdmin && <td>{asistencia.ip}</td>}
+                                {esAdmin && <td>{asistencia.ip ? asistencia.ip : "No disponible"}</td>}
                             </tr>
                         ))}
                     </tbody>

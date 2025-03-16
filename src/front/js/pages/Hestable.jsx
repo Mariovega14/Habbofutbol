@@ -3,7 +3,7 @@ import "../../styles/hestable.css";
 import { useNavigate } from "react-router-dom";
 
 const HesDashboard = () => {
-  
+
   const navigate = useNavigate();
 
   return (
@@ -13,14 +13,14 @@ const HesDashboard = () => {
       </header>
 
       <div className="hes-grid">
-        <div className="hes-card hes-ranking">
+        <div className="hes-card hes-ranking" onClick={() => navigate("/hes/rankings")}>
           <h2>Ranking</h2>
           <p>Consulta las estadísticas de los jugadores y equipos.</p>
         </div>
 
-        <div className="hes-card hes-foro">
-          <h2>Foro</h2>
-          <p>Discute estrategias y novedades con la comunidad.</p>
+        <div className="hes-card hes-foro" onClick={() => navigate("/hes/resumenes")}>
+          <h2>Resumenes</h2>
+          <p>Resumenes Completos de tus Partidos.</p>
         </div>
 
         <div className="hes-card hes-convocatorias">

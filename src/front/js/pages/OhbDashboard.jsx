@@ -4,7 +4,7 @@ import "../../styles/ohbtable.css";
 
 const OhbDashboard = () => {
 
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
   return (
     <div className="ohb-container">
@@ -13,14 +13,14 @@ const navigate = useNavigate();
       </header>
 
       <div className="ohb-grid">
-        <div className="ohb-card ohb-ranking">
+        <div className="ohb-card ohb-ranking" onClick={() => navigate("/ohb/rankings")}>
           <h2>Ranking</h2>
           <p>Consulte as estatísticas dos jogadores e equipes.</p>
         </div>
 
-        <div className="ohb-card ohb-foro">
-          <h2>Fórum</h2>
-          <p>Discuta estratégias e novidades com a comunidade.</p>
+        <div className="ohb-card ohb-foro" onClick={() => navigate("/ohb/resumenes")}>
+            <h2>Resumos</h2>
+            <p>Resumos completos dos seus jogos.</p>
         </div>
 
         <div className="ohb-card ohb-convocatorias">
@@ -32,8 +32,8 @@ const navigate = useNavigate();
           <h2>Equipes</h2>
           <p>Gerencie as equipes participantes em cada torneio.</p>
         </div>
-        </div>
-        </div>
+      </div>
+    </div>
   );
 };
 export default OhbDashboard;

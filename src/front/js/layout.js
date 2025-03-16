@@ -15,10 +15,12 @@ import Equipos from "./pages/Equipos.jsx"
 import CrearTorneo from "./pages/CrearTorneo.jsx"
 import Login from "./pages/Login.jsx"
 import EquiposModalidad from "./component/EquiposModalidad.jsx";
+import Rankings from "./component/Rankings.jsx";
 import { Home } from "./pages/home";
 import { Demo } from "./pages/demo";
 import { Single } from "./pages/single";
 import injectContext from "./store/appContext";
+import ResumenesPartidos from "./component/Resumenes.jsx"; 
 
 import { Navbar } from "./component/navbar";
 
@@ -52,6 +54,8 @@ const Layout = () => {
                         <Route element={<AicDashboard />} path="/aic" />
                         <Route element={<HFADashboard />} path="/hfa" />
                         <Route element={<OhbDashboard />} path="/ohb" />
+                        <Route element={<ResumenesPartidos />} path="/:modalidad/resumenes" />
+                        <Route element={<Rankings />} path="/:modalidad/rankings" />
                         <Route element={<EquiposModalidad />} path="/:modalidad/equipos" />
                         <Route element={<Demo />} path="/demo" />
                         <Route element={<Single />} path="/single/:theid" />

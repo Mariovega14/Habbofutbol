@@ -12,14 +12,14 @@ const HFADashboard = () => {
       </header>
 
       <div className="hfa-grid">
-        <div className="hfa-card hfa-ranking">
+        <div className="hfa-card hfa-ranking" onClick={() => navigate("/hfa/rankings")}>
           <h2>Ranking</h2>
           <p>Consulta las estadísticas de los jugadores y equipos.</p>
         </div>
 
-        <div className="hfa-card hfa-foro">
-          <h2>Foro</h2>
-          <p>Discute estrategias y novedades con la comunidad.</p>
+        <div className="hfa-card hfa-foro" onClick={() => navigate("/hfa/resumenes")}>
+          <h2>Resumenes</h2>
+          <p>Resumenes Completos de tus Partidos.</p>
         </div>
 
         <div className="hfa-card hfa-convocatorias">
