@@ -274,7 +274,7 @@ def registrar_asistencia():
     if not nombre:
         return jsonify({"message": "El nombre es obligatorio"}), 400
 
-    ip = request.remote_addr  # Captura la IP del usuario
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr)  # Captura la IP del usuario
 
     nueva_asistencia = Asistencia(nombre=nombre, ip=ip)
     db.session.add(nueva_asistencia)
