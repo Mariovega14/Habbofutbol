@@ -118,6 +118,7 @@ def crear_superadmin():
     print("✅ Superadmin creado con éxito")
 
 with app.app_context():
+    db.create_all()  # Asegura que las tablas existen antes de crear el superadmin
     crear_superadmin()
 
 
