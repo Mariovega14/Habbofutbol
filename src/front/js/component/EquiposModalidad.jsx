@@ -10,18 +10,15 @@ const EquiposModalidad = () => {
     const [jugadores, setJugadores] = useState([]);
 
     useEffect(() => {
-        actions.getEquipos(); // Carga la lista de equipos cuando el componente se monta
+        actions.getEquiposConLogo(); // ✅ Cargar equipos con logos
     }, []);
 
-    // Asegurar que modalidad no sea undefined antes de llamar .toLowerCase()
     const modalidadLower = modalidad ? modalidad.toLowerCase() : "";
 
-    // Filtrar equipos por modalidad
     const equiposFiltrados = store.equipos
         ? store.equipos.filter(equipo => equipo.modalidad && equipo.modalidad.toLowerCase() === modalidadLower)
         : [];
 
-    // Función para obtener jugadores de un equipo al hacer clic
     const handleClickEquipo = async (equipoId) => {
         setEquipoSeleccionado(equipoId);
         const jugadoresData = await actions.getJugadoresPorEquipo(equipoId);
@@ -38,12 +35,14 @@ const EquiposModalidad = () => {
                         className={`equipo ${equipoSeleccionado === equipo.id ? "seleccionado" : ""}`}
                         onClick={() => handleClickEquipo(equipo.id)}
                     >
+                        {equipo.logo_url && (
+                            <img src={equipo.logo_url} alt={`${equipo.nombre} logo`} className="equipo-logo" />
+                        )}
                         {equipo.nombre}
                     </li>
                 ))}
             </ul>
 
-            {/* Mostrar jugadores si hay un equipo seleccionado */}
             {equipoSeleccionado && (
                 <div className="jugadores-container">
                     <h2>Jugadores del equipo seleccionado</h2>

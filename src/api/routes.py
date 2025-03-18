@@ -2,13 +2,16 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, Jugador, Equipo, Torneo, Partido, EstadisticaJugador, Asistencia, JugadorEquipo
-from api.utils import generate_sitemap, APIException, get_client_ip
+from api.models import db, Jugador, Equipo, Torneo, Partido, EstadisticaJugador, Asistencia, JugadorEquipo, Oferta, Convocatoria
+from api.utils import generate_sitemap, APIException, get_client_ip, is_valid_password
 from flask_cors import CORS
 import os
 from base64 import b64encode
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request, get_jwt
+import cloudinary.uploader
+from cloudinary.uploader import upload
+from datetime import datetime
 
 
 api = Blueprint('api', __name__)
@@ -17,13 +20,18 @@ api = Blueprint('api', __name__)
 CORS(api)
 
 
+
+
 @api.route('/register', methods=['POST'])
 def add_new_player():
     body = request.json
     required_fields = ["email", "name", "password", "nickhabbo"]
-    
+
     if not all(body.get(field) for field in required_fields):
         return jsonify({"error": "Todos los datos tienen que estar completos"}), 400
+
+    if not is_valid_password(body["password"]):
+        return jsonify({"error": "La contraseña debe contener al menos una letra, un número y ser de 6 caracteres o más"}), 400
 
     email, name, password, nickhabbo = [body[field] for field in required_fields]
 
@@ -35,7 +43,7 @@ def add_new_player():
 
     new_player = Jugador(
         name=name, email=email, password=hashed_password, salt=salt,
-        nickhabbo=nickhabbo, role="jugador", is_active=True
+        nickhabbo=nickhabbo, role="jugador", is_active=True, is_registered=True
     )
 
     try:
@@ -45,6 +53,7 @@ def add_new_player():
     except Exception as err:
         db.session.rollback()
         return jsonify({"error": f"Error en el servidor: {err.args}"}), 500
+
 
 @api.route('/jugadores/admin', methods=['POST'])
 @jwt_required()
@@ -75,15 +84,9 @@ def crear_jugador_admin():
         db.session.rollback()
         return jsonify({"error": f"Error en el servidor: {str(err)}"}), 500
 
-@api.route('/admin/players', methods=['GET'])
-@jwt_required()
+@api.route('/jugadores', methods=['GET'])
 def get_all_players():
-    """Lista todos los jugadores con sus equipos y modalidades (Solo admins)"""
-    current_user_id = get_jwt_identity()
-    admin = Jugador.query.get(current_user_id)
-
-    if not admin or admin.role != "admin":
-        return jsonify({"error": "Acceso denegado"}), 403
+    """Lista todos los jugadores con sus equipos y modalidades (Público)"""
 
     try:
         players = Jugador.query.all()
@@ -104,6 +107,27 @@ def get_all_players():
             })
 
         return jsonify(players_list), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Error en el servidor: {str(e)}"}), 500
+
+    
+
+@api.route('/equipos/<int:equipo_id>/jugadores', methods=['GET'])
+def get_jugadores_por_equipo(equipo_id):
+    """Obtiene los jugadores de un equipo específico basado en su ID"""
+    try:
+        equipo = Equipo.query.get(equipo_id)
+        if not equipo:
+            return jsonify({"error": "Equipo no encontrado"}), 404
+
+        # Accede a los jugadores a través de la tabla intermedia jugadores_equipos
+        jugadores = [
+            {"id": je.jugador.id, "nickhabbo": je.jugador.nickhabbo}
+            for je in equipo.jugadores_equipos  # <- CORREGIDO
+        ]
+
+        return jsonify({"jugadores": jugadores}), 200
 
     except Exception as e:
         return jsonify({"error": f"Error en el servidor: {str(e)}"}), 500
@@ -143,25 +167,40 @@ def add_player_to_team():
 
 
 @api.route("/remove_team", methods=["DELETE"])
+@jwt_required()
 def remove_team():
-    data = request.json
-    player_id = data.get("player_id")
-    team_id = data.get("team_id")
+    """Solo los Admins pueden eliminar jugadores de un equipo"""
+    try:
+        # 🔍 Obtener el rol del usuario autenticado
+        jwt_data = get_jwt()
+        user_role = jwt_data.get("role")
 
-    if not player_id or not team_id:
-        return jsonify({"error": "Datos incompletos"}), 400
+        # 🚫 Solo los admins pueden hacer esto
+        if user_role != "admin":
+            return jsonify({"error": "Acceso denegado"}), 403
 
-    # Buscar la relación en la tabla intermedia
-    jugador_equipo = JugadorEquipo.query.filter_by(jugador_id=player_id, equipo_id=team_id).first()
+        # 📌 Obtener datos de la petición
+        data = request.json
+        player_id = data.get("player_id")
+        team_id = data.get("team_id")
 
-    if not jugador_equipo:
-        return jsonify({"error": "El jugador no pertenece a este equipo"}), 404
+        if not player_id or not team_id:
+            return jsonify({"error": "Datos incompletos"}), 400
 
-    # Eliminar la relación de la tabla intermedia
-    db.session.delete(jugador_equipo)
-    db.session.commit()
+        # 🔍 Buscar la relación en la tabla intermedia
+        jugador_equipo = JugadorEquipo.query.filter_by(jugador_id=player_id, equipo_id=team_id).first()
 
-    return jsonify({"message": "Equipo eliminado correctamente"})
+        if not jugador_equipo:
+            return jsonify({"error": "El jugador no pertenece a este equipo"}), 404
+
+        # 🗑 Eliminar la relación de la tabla intermedia
+        db.session.delete(jugador_equipo)
+        db.session.commit()
+
+        return jsonify({"message": "Jugador eliminado del equipo correctamente"}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Error en el servidor: {str(e)}"}), 500
  
 
 
@@ -240,7 +279,7 @@ def login():
 
         if check_password_hash(user.password, f"{password}{user.salt}"):
             token = create_access_token(identity=str(user.id), additional_claims={"role": user.role})
-            return jsonify({"token": token, "role": user.role}), 200  
+            return jsonify({"token": token, "role": user.role, "id": user.id}), 200 
         else:
             return jsonify({"message": "Correo o contraseña incorrectos."}), 401  # Cambiado a 401
 
@@ -248,51 +287,85 @@ def login():
         return jsonify({"error": str(err)}), 500
     
 
+@api.route('/asistencia', methods=['POST'])
+def registrar_asistencia():
+    data = request.get_json()
+    nombre = data.get("nombre", "").strip()
+
+    if not nombre:
+        return jsonify({"message": "El nombre es obligatorio"}), 400
+
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr)  # Captura la IP del usuario
+
+    nueva_asistencia = Asistencia(nombre=nombre, ip=ip)
+    db.session.add(nueva_asistencia)
+    db.session.commit()
+
+    return jsonify({"message": "Asistencia registrada correctamente"}), 201
+
+    
+
 @api.route('/asistencia', methods=['GET'])
-@jwt_required(optional=True) 
 def obtener_asistencias():
     """Devuelve todas las asistencias registradas. Solo los admins ven la IP."""
-    claims = get_jwt_identity()  # Obtiene el usuario actual si está logueado
     es_admin = False
 
-    if claims:
-        usuario = Jugador.query.get(claims)
-        es_admin = usuario and usuario.role == "admin"
-        
+    try:
+        if verify_jwt_in_request(optional=True):  
+            claims = get_jwt_identity()
+            usuario = Jugador.query.get(claims)
+            es_admin = usuario and usuario.role == "admin"
+    except:
+        pass  # Si no hay token, simplemente seguimos sin admin
 
     asistencias = Asistencia.query.all()
     return jsonify([asistencia.serialize(admin=es_admin) for asistencia in asistencias])
 
 @api.route('/torneos', methods=['POST'])
+@jwt_required()
 def crear_torneo():
-    data = request.json
+    """Solo los Admins pueden crear torneos"""
+    try:
+        # 🔍 Obtener el rol del usuario autenticado
+        jwt_data = get_jwt()
+        user_role = jwt_data.get("role")
 
-    # Validaciones
-    if not data.get("nombre") or not data.get("modalidad") or not data.get("formato"):
-        return jsonify({"error": "Nombre, modalidad y formato son obligatorios"}), 400
+        # 🚫 Solo los admins pueden crear torneos
+        if user_role != "admin":
+            return jsonify({"error": "Acceso denegado"}), 403
 
-    formatos_validos = ["liga", "eliminacion", "grupos_playoffs"]
-    if data["formato"] not in formatos_validos:
-        return jsonify({"error": "Formato inválido"}), 400
+        # 📌 Obtener datos de la petición
+        data = request.json
 
-    # Verificar si el torneo ya existe
-    if Torneo.query.filter_by(nombre=data["nombre"]).first():
-        return jsonify({"error": "El torneo ya existe"}), 409
+        # 🛑 Validaciones
+        if not data.get("nombre") or not data.get("modalidad") or not data.get("formato"):
+            return jsonify({"error": "Nombre, modalidad y formato son obligatorios"}), 400
 
-    # Crear el torneo
-    nuevo_torneo = Torneo(nombre=data["nombre"], modalidad=data["modalidad"], formato=data["formato"])
-    db.session.add(nuevo_torneo)
-    db.session.commit()
+        formatos_validos = ["liga", "eliminacion", "grupos_playoffs"]
+        if data["formato"] not in formatos_validos:
+            return jsonify({"error": "Formato inválido"}), 400
 
-    return jsonify({
-        "message": "Torneo creado exitosamente",
-        "torneo": {
-            "id": nuevo_torneo.id,
-            "nombre": nuevo_torneo.nombre,
-            "modalidad": nuevo_torneo.modalidad,
-            "formato": nuevo_torneo.formato
-        }
-    }), 201
+        # 🔍 Verificar si el torneo ya existe
+        if Torneo.query.filter_by(nombre=data["nombre"]).first():
+            return jsonify({"error": "El torneo ya existe"}), 409
+
+        # 🏆 Crear el torneo
+        nuevo_torneo = Torneo(nombre=data["nombre"], modalidad=data["modalidad"], formato=data["formato"])
+        db.session.add(nuevo_torneo)
+        db.session.commit()
+
+        return jsonify({
+            "message": "Torneo creado exitosamente",
+            "torneo": {
+                "id": nuevo_torneo.id,
+                "nombre": nuevo_torneo.nombre,
+                "modalidad": nuevo_torneo.modalidad,
+                "formato": nuevo_torneo.formato
+            }
+        }), 201
+
+    except Exception as e:
+        return jsonify({"error": f"Error en el servidor: {str(e)}"}), 500
 
 @api.route('/torneos', methods=['GET'])
 def obtener_torneos():
@@ -311,30 +384,55 @@ def obtener_torneos():
     except Exception as e:
         return jsonify({"error": "Error al obtener los torneos", "detalle": str(e)}), 500
 
+
 @api.route('/equipos', methods=['POST'])
+@jwt_required()
 def crear_equipo():
-    data = request.json
+    """Solo los Admins pueden crear equipos"""
+    try:
+        # 🔍 Obtener el rol del usuario autenticado
+        jwt_data = get_jwt()
+        user_role = jwt_data.get("role")
 
-    nombre = data.get("nombre")
-    torneo_id = data.get("torneo_id")
+        # 🚫 Solo los admins pueden crear equipos
+        if user_role != "admin":
+            return jsonify({"error": "Acceso denegado"}), 403
 
-    if not nombre or not torneo_id:
-        return jsonify({"message": "El nombre y el torneo son obligatorios"}), 400
+        # 📌 Obtener datos de la petición
+        nombre = request.form.get("nombre")
+        torneo_id = request.form.get("torneo_id")
 
-    # Verificamos si el equipo ya existe
-    equipo_existente = Equipo.query.filter_by(nombre=nombre).first()
-    if equipo_existente:
-        return jsonify({"message": "El equipo ya existe"}), 400
+        if not nombre or not torneo_id:
+            return jsonify({"error": "El nombre y el torneo son obligatorios"}), 400
 
-    # Creamos el equipo sin jugadores
-    nuevo_equipo = Equipo(nombre=nombre, torneo_id=torneo_id)
-    db.session.add(nuevo_equipo)
-    db.session.commit()
+        try:
+            torneo_id = int(torneo_id)
+        except ValueError:
+            return jsonify({"error": "El torneo_id debe ser un número entero"}), 400
 
-    return jsonify({
-        "message": "Equipo creado exitosamente",
-        "equipo": {"id": nuevo_equipo.id, "nombre": nuevo_equipo.nombre}
-    }), 201
+        # 📌 Procesar logo si existe
+        logo = request.files.get("logo")
+        logo_url = None
+        if logo:
+            try:
+                result = upload(logo)
+                logo_url = result["secure_url"]
+            except Exception as e:
+                return jsonify({"error": f"Error al subir la imagen: {str(e)}"}), 500
+
+        # 🏆 Guardar equipo en la base de datos
+        nuevo_equipo = Equipo(nombre=nombre, torneo_id=torneo_id, logo_url=logo_url)
+        db.session.add(nuevo_equipo)
+        db.session.commit()
+
+        return jsonify({"message": "Equipo creado exitosamente"}), 201
+
+    except Exception as e:
+        return jsonify({"error": f"Error en el servidor: {str(e)}"}), 500
+
+
+
+
 
 @api.route('/equipos', methods=['GET'])
 def obtener_equipos():
@@ -347,57 +445,115 @@ def obtener_equipos():
     
     return jsonify(equipos_serializados), 200
 
-@api.route('/equipos/<int:equipo_id>', methods=['DELETE'])
-def eliminar_equipo(equipo_id):
-    equipo = Equipo.query.get(equipo_id)
+
+@api.route('/equipos-con-logo', methods=['GET'])
+def obtener_equipos_con_logo():
+    equipos = Equipo.query.all()
     
-    if not equipo:
-        return jsonify({"message": "Equipo no encontrado"}), 404
+    equipos_serializados = [
+        {
+            "id": equipo.id,
+            "nombre": equipo.nombre,
+            "torneo_id": equipo.torneo_id,
+            "modalidad": equipo.torneo.modalidad if equipo.torneo else "Desconocida",
+            "logo_url": equipo.logo_url  # ✅ Aquí incluimos la imagen
+        }
+        for equipo in equipos
+    ]
+    
+    return jsonify(equipos_serializados), 200
+    
 
-    db.session.delete(equipo)
-    db.session.commit()
+@api.route('/equipos/<int:equipo_id>', methods=['DELETE'])
+@jwt_required()
+def eliminar_equipo(equipo_id):
+    """Solo los Admins pueden eliminar equipos"""
+    try:
+        # 🔍 Obtener el rol del usuario autenticado
+        jwt_data = get_jwt()
+        user_role = jwt_data.get("role")
 
-    return jsonify({"message": "Equipo eliminado correctamente"}), 200
+        # 🚫 Solo los admins pueden eliminar equipos
+        if user_role != "admin":
+            return jsonify({"error": "Acceso denegado"}), 403
 
+        # 📌 Buscar el equipo en la base de datos
+        equipo = Equipo.query.get(equipo_id)
+        if not equipo:
+            return jsonify({"message": "Equipo no encontrado"}), 404
+
+        db.session.delete(equipo)
+        db.session.commit()
+
+        return jsonify({"message": "Equipo eliminado correctamente"}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Error en el servidor: {str(e)}"}), 500
 
 
 @api.route('/torneos/<int:torneo_id>', methods=['DELETE'])
 @jwt_required()
 def eliminar_torneo(torneo_id):
-    torneo = Torneo.query.get(torneo_id)
-
-    if not torneo:
-        return jsonify({"message": "Torneo no encontrado"}), 404
-
+    """Solo los Admins pueden eliminar torneos"""
     try:
+        # 🔍 Obtener el rol del usuario autenticado
+        jwt_data = get_jwt()
+        user_role = jwt_data.get("role")
+
+        # 🚫 Solo los admins pueden eliminar torneos
+        if user_role != "admin":
+            return jsonify({"error": "Acceso denegado"}), 403
+
+        # 📌 Buscar el torneo en la base de datos
+        torneo = Torneo.query.get(torneo_id)
+        if not torneo:
+            return jsonify({"message": "Torneo no encontrado"}), 404
+
         db.session.delete(torneo)
         db.session.commit()
+
         return jsonify({"message": "Torneo eliminado exitosamente"}), 200
+
     except Exception as e:
         db.session.rollback()
         return jsonify({"message": "Error al eliminar el torneo", "error": str(e)}), 500
     
+
+
+
 @api.route('/partidos', methods=['POST'])
 @jwt_required()
 def registrar_partido():
-    """Registrar un partido con sus estadísticas"""
+    """Registrar un partido (Solo Admins o Árbitros)"""
     try:
+        current_user_id = get_jwt_identity()
+        usuario = Jugador.query.get(current_user_id)
+
+        # 🔥 Validar que el usuario sea admin o árbitro
+        if not usuario or usuario.role not in ["admin", "arbitro"]:
+            return jsonify({"error": "Acceso denegado. Solo administradores y árbitros pueden registrar partidos."}), 403
+
+        # 📌 Obtener los datos del partido
         data = request.get_json()
         if not data:
             return jsonify({"error": "No se recibieron datos en la solicitud"}), 400
 
-        # Verificar si algún campo está ausente o vacío
+        # 🔍 Verificar que los campos requeridos estén presentes
         required_fields = [
             "torneo_id", "equipo_a_id", "equipo_b_id", "juez",
             "goles_equipo_a", "goles_equipo_b",
             "mvp_id", "mencion_equipo_a_id", "mencion_equipo_b_id"
         ]
-
         for field in required_fields:
             if field not in data or not str(data[field]).strip():
                 return jsonify({"error": f"Falta el campo requerido: {field}"}), 400
 
-        # Crear el partido en la base de datos
+        # 📌 Obtener torneo para incluir la modalidad
+        torneo = Torneo.query.get(data["torneo_id"])
+        if not torneo:
+            return jsonify({"error": "El torneo seleccionado no existe"}), 404
+
+        # ✅ Crear el partido
         nuevo_partido = Partido(
             torneo_id=int(data["torneo_id"]),
             equipo_a_id=int(data["equipo_a_id"]),
@@ -413,12 +569,47 @@ def registrar_partido():
         )
 
         db.session.add(nuevo_partido)
-        db.session.commit()
+        db.session.commit()  # Guardar el partido en la base de datos
 
-        return jsonify({"message": "Partido registrado correctamente"}), 201
+        # ✅ Guardar estadísticas si existen
+        if "estadisticas" in data and isinstance(data["estadisticas"], list):
+            for estadistica in data["estadisticas"]:
+                nueva_estadistica = EstadisticaJugador(
+                    partido_id=nuevo_partido.id,
+                    jugador_id=int(estadistica["jugador_id"]),
+                    goles=int(estadistica.get("goles", 0)),
+                    asistencias=int(estadistica.get("asistencias", 0)),
+                    autogoles=int(estadistica.get("autogoles", 0))
+                )
+                db.session.add(nueva_estadistica)
+
+        db.session.commit()  # Guardar estadísticas en la base de datos
+
+        # ✅ Respuesta con los datos del partido registrado
+        return jsonify({
+            "message": "Partido registrado correctamente",
+            "partido": {
+                "id": nuevo_partido.id,
+                "torneo_id": nuevo_partido.torneo_id,
+                "modalidad": torneo.modalidad,
+                "equipo_a_id": nuevo_partido.equipo_a_id,
+                "equipo_b_id": nuevo_partido.equipo_b_id,
+                "estado": nuevo_partido.estado,
+                "fecha": nuevo_partido.fecha.strftime("%Y-%m-%d %H:%M:%S"),
+                "juez": nuevo_partido.juez,
+                "goles_equipo_a": nuevo_partido.goles_equipo_a,
+                "goles_equipo_b": nuevo_partido.goles_equipo_b,
+                "mvp": nuevo_partido.mvp_id,
+                "observaciones": nuevo_partido.observaciones
+            }
+        }), 201
 
     except Exception as e:
+        db.session.rollback()  # Revertir cambios en caso de error
         return jsonify({"error": "Error interno en el servidor", "detalle": str(e)}), 500
+
+
+
 
 @api.route('/equipos/torneo/<int:torneo_id>', methods=['GET'])
 def obtener_equipos_por_torneo(torneo_id):
@@ -439,8 +630,33 @@ def obtener_equipos_por_torneo(torneo_id):
 def obtener_partidos():
     try:
         partidos = Partido.query.all()
-        partidos_json = [
-            {
+        partidos_json = []
+
+        for partido in partidos:
+            estadisticas_json = []
+            
+            for estadistica in partido.estadisticas:
+                # ⚠️ Obtener el jugador directamente de la estadística
+                jugador_id = estadistica.jugador_id
+                
+                # ⚠️ Buscar el equipo en jugadores_equipos
+                equipo_id = db.session.query(JugadorEquipo.equipo_id).filter(
+                    JugadorEquipo.jugador_id == jugador_id,
+                    JugadorEquipo.equipo_id.in_([partido.equipo_a_id, partido.equipo_b_id])
+                ).scalar()
+
+                # ⚠️ Imprimir para depuración
+                print(f"🔍 Jugador ID: {jugador_id}, Equipo ID: {equipo_id}")
+
+                estadisticas_json.append({
+                    "jugador_id": jugador_id,
+                    "equipo_id": equipo_id,  # ✅ Ahora obtenemos correctamente el equipo del jugador
+                    "goles": estadistica.goles,
+                    "asistencias": estadistica.asistencias,
+                    "autogoles": estadistica.autogoles
+                })
+
+            partidos_json.append({
                 "id": partido.id,
                 "torneo_id": partido.torneo_id,
                 "equipo_a_id": partido.equipo_a_id,
@@ -450,17 +666,26 @@ def obtener_partidos():
                 "juez": partido.juez,
                 "goles_equipo_a": partido.goles_equipo_a,
                 "goles_equipo_b": partido.goles_equipo_b,
-                "link_video": partido.link_video,
                 "mvp_id": partido.mvp_id,
                 "mencion_equipo_a_id": partido.mencion_equipo_a_id,
                 "mencion_equipo_b_id": partido.mencion_equipo_b_id,
-                "observaciones": partido.observaciones
-            }
-            for partido in partidos
-        ]
+                "observaciones": partido.observaciones,
+                "modalidad": partido.torneo.modalidad if partido.torneo else None,
+                "link_video": partido.link_video,
+                "estadisticas": estadisticas_json  # ✅ Ahora incluye el equipo_id correcto
+            })
+
         return jsonify(partidos_json), 200
     except Exception as e:
+        print(f"⚠️ Error en obtener_partidos: {str(e)}")  # 🔍 DEPURAR ERROR
         return jsonify({"error": "Error al obtener los partidos", "detalle": str(e)}), 500
+
+
+
+
+
+
+
     
 
 @api.route('/admin/players/<int:jugador_id>/remove-team/<int:equipo_id>', methods=['PUT'])
@@ -493,7 +718,407 @@ def remove_team_from_player(jugador_id, equipo_id):
         db.session.rollback()
         return jsonify({"error": f"Error en el servidor: {str(err)}"}), 500
 
+
+@api.route('/tablas/posiciones/<int:torneo_id>', methods=['GET'])
+def obtener_tabla_posiciones(torneo_id):
+    try:
+        torneo = Torneo.query.get(torneo_id)
+        if not torneo:
+            return jsonify({"error": "Torneo no encontrado"}), 404
+
+        equipos = Equipo.query.filter_by(torneo_id=torneo_id).all()
+        tabla = []
+
+        for equipo in equipos:
+            partidos_jugados = Partido.query.filter(
+                (Partido.equipo_a_id == equipo.id) | (Partido.equipo_b_id == equipo.id)
+            ).all()
+
+            puntos = 0
+            partidos_ganados = 0
+            partidos_empatados = 0
+            partidos_perdidos = 0
+            goles_favor = 0
+            goles_contra = 0
+            partidos_totales = 0  # 🔥 Contador de partidos jugados
+
+            for partido in partidos_jugados:
+                if partido.estado != "finalizado":
+                    continue  # Solo contar partidos terminados
+
+                partidos_totales += 1  # 🔥 Incrementamos los partidos jugados
+
+                if partido.equipo_a_id == equipo.id:
+                    goles_favor += partido.goles_equipo_a
+                    goles_contra += partido.goles_equipo_b
+                    if partido.goles_equipo_a > partido.goles_equipo_b:
+                        partidos_ganados += 1
+                        puntos += 3
+                    elif partido.goles_equipo_a == partido.goles_equipo_b:
+                        partidos_empatados += 1
+                        puntos += 1
+                    else:
+                        partidos_perdidos += 1
+
+                elif partido.equipo_b_id == equipo.id:
+                    goles_favor += partido.goles_equipo_b
+                    goles_contra += partido.goles_equipo_a
+                    if partido.goles_equipo_b > partido.goles_equipo_a:
+                        partidos_ganados += 1
+                        puntos += 3
+                    elif partido.goles_equipo_b == partido.goles_equipo_a:
+                        partidos_empatados += 1
+                        puntos += 1
+                    else:
+                        partidos_perdidos += 1
+
+            tabla.append({
+                "equipo": equipo.nombre,
+                "puntos": puntos,
+                "partidos_jugados": partidos_totales,  # ✅ Ahora sí enviamos los partidos jugados
+                "ganados": partidos_ganados,
+                "empatados": partidos_empatados,
+                "perdidos": partidos_perdidos,
+                "goles_favor": goles_favor,
+                "goles_contra": goles_contra,
+                "diferencia_goles": goles_favor - goles_contra
+            })
+
+        tabla_ordenada = sorted(tabla, key=lambda x: (-x["puntos"], -x["diferencia_goles"]))
+
+        return jsonify(tabla_ordenada), 200
+
+    except Exception as e:
+        print(f"❌ Error en obtener_tabla_posiciones: {str(e)}")
+        return jsonify({"error": "Error en el servidor", "detalle": str(e)}), 500
+
+
+
+
+
+
+@api.route('/tablas/goleadores/<int:torneo_id>', methods=['GET'])
+def obtener_goleadores_por_torneo(torneo_id):
+    """Obtener tabla de goleadores de un torneo específico"""
+    jugadores = db.session.query(
+        Jugador.id, Jugador.nickhabbo, db.func.sum(EstadisticaJugador.goles).label("total_goles")
+    ).join(EstadisticaJugador).join(Partido).filter(
+        Partido.torneo_id == torneo_id  # 🔹 Filtrar por torneo
+    ).group_by(Jugador.id).order_by(db.desc("total_goles")).all()
+
+    goleadores = [{"id": j[0], "nickhabbo": j[1], "goles": j[2] or 0} for j in jugadores]  # Evitar valores None
+
+    return jsonify(goleadores), 200
+
+
+
+@api.route('/tablas/asistidores/<int:torneo_id>', methods=['GET'])
+def obtener_asistidores_por_torneo(torneo_id):
+    """Obtener tabla de asistidores de un torneo específico"""
+    jugadores = db.session.query(
+        Jugador.id, Jugador.nickhabbo, db.func.sum(EstadisticaJugador.asistencias).label("total_asistencias")
+    ).join(EstadisticaJugador).join(Partido).filter(
+        Partido.torneo_id == torneo_id  # 🔹 Filtrar por torneo
+    ).group_by(Jugador.id).order_by(db.desc("total_asistencias")).all()
+
+    asistidores = [{"id": j[0], "nickhabbo": j[1], "asistencias": j[2] or 0} for j in jugadores]  # Evitar valores None
+
+    return jsonify(asistidores), 200
+
+
+@api.route('/tablas/mvps', methods=['GET'])
+def obtener_mvps():
+    """Obtener jugadores con más MVPs"""
+    jugadores_mvp = db.session.query(
+        Jugador.id, Jugador.nickhabbo, db.func.count(Partido.mvp_id).label("total_mvps")
+    ).join(Partido, Jugador.id == Partido.mvp_id).group_by(Jugador.id).order_by(db.desc("total_mvps")).all()
+
+    mvps = [{"id": j[0], "nickhabbo": j[1], "mvps": j[2]} for j in jugadores_mvp]
+
+    return jsonify(mvps), 200
+
+
+@api.route('/tablas/menciones', methods=['GET'])
+def obtener_menciones():
+    """Obtener jugadores con más menciones especiales"""
+    jugadores_mencion = db.session.query(
+        Jugador.id, Jugador.nickhabbo, db.func.count().label("total_menciones")
+    ).filter(
+        (Jugador.id == Partido.mencion_equipo_a_id) | (Jugador.id == Partido.mencion_equipo_b_id)
+    ).group_by(Jugador.id).order_by(db.desc("total_menciones")).all()
+
+    menciones = [{"id": j[0], "nickhabbo": j[1], "menciones": j[2]} for j in jugadores_mencion]
+
+    return jsonify(menciones), 200
+
+
+@api.route("/jugador/crear_convocatoria", methods=["POST"])
+def crear_convocatoria():
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"error": "Datos no proporcionados"}), 400
+
+    jugador_id = data.get("jugador_id")
+    modalidad = data.get("modalidad")
+
+    # Verificar si ya existe una convocatoria para esta modalidad
+    convocatoria_existente = Convocatoria.query.filter_by(jugador_id=jugador_id, modalidad=modalidad).first()
+    if convocatoria_existente:
+        return jsonify({"error": "Ya tienes una convocatoria activa en esta modalidad"}), 400
+
+    # Crear nueva convocatoria
+    nueva_convocatoria = Convocatoria(
+        jugador_id=jugador_id,
+        mensaje=data.get("mensaje"),
+        modalidad=modalidad
+    )
+
+    db.session.add(nueva_convocatoria)
+    db.session.commit()
+
+    return jsonify({"mensaje": "Convocatoria creada con éxito"}), 201
+
+
+@api.route("/convocatorias/<string:modalidad>", methods=["GET"])
+def obtener_convocatorias(modalidad):
+    convocatorias = db.session.query(
+        Convocatoria.id,
+        Convocatoria.jugador_id,
+        Convocatoria.mensaje,
+        Convocatoria.modalidad,
+        Jugador.nickhabbo
+    ).join(Jugador, Jugador.id == Convocatoria.jugador_id).filter(Convocatoria.modalidad == modalidad).all()
+
+    resultado = [
+        {
+            "id": c.id,
+            "jugador_id": c.jugador_id,
+            "mensaje": c.mensaje,
+            "modalidad": c.modalidad,
+            "nickhabbo": c.nickhabbo
+        } for c in convocatorias
+    ]
+
+    return jsonify(resultado), 200
+
+
+@api.route("/dt/ofertar", methods=["POST"])
+def ofertar_jugador():
+    try:
+        data = request.json
+
+        dt_id = data.get("dt_id")
+        jugador_id = data.get("jugador_id")
+        equipo_id = data.get("equipo_id")
+
+        # Validar que sean números
+        if not dt_id or not jugador_id or not equipo_id:
+            return jsonify({"error": "Faltan datos obligatorios"}), 400
+
+        try:
+            dt_id = int(dt_id)
+            jugador_id = int(jugador_id)
+            equipo_id = int(equipo_id)
+        except ValueError:
+            return jsonify({"error": "ID inválidos, deben ser números enteros"}), 400
+
+        dt = Jugador.query.get(dt_id)
+        jugador = Jugador.query.get(jugador_id)
+        equipo = Equipo.query.get(equipo_id)
+
+        if not dt or not jugador or not equipo:
+            return jsonify({"error": "Datos inválidos"}), 400
+
+        if dt.role != "dt":
+            return jsonify({"error": "Solo un DT puede hacer ofertas"}), 403
+
+        nueva_oferta = Oferta(dt_id=dt_id, jugador_id=jugador_id, equipo_id=equipo_id)
+        db.session.add(nueva_oferta)
+        db.session.commit()
+
+        return jsonify({"message": f"Oferta enviada a {jugador.nickhabbo} para {equipo.nombre}."})
+
+    except Exception as err:
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+
+
+
+@api.route("/jugador/<int:jugador_id>/ofertas/<string:modalidad>", methods=["GET"])
+def ver_ofertas_por_modalidad(jugador_id, modalidad):
+    modalidad = modalidad.upper()  # Normalizar modalidad
+
+    # Verificar si el jugador tiene convocatorias en esa modalidad
+    existe_convocatoria = Convocatoria.query.filter_by(jugador_id=jugador_id, modalidad=modalidad).first()
+    if not existe_convocatoria:
+        return jsonify({"error": f"No se encontraron convocatorias en la modalidad {modalidad} para este jugador"}), 404
+
+    # Filtrar ofertas directamente en la consulta SQLAlchemy
+    ofertas = Oferta.query.join(Equipo).join(Torneo).filter(
+        Oferta.jugador_id == jugador_id,
+        Torneo.modalidad == modalidad
+    ).all()
+
+    resultados = [{
+        "id": o.id,
+        "dt_id": o.dt_id,
+        "equipo_id": o.equipo_id,
+        "equipo_nombre": o.equipo.nombre,
+        "dt_nombre": o.dt.nickhabbo,
+        "modalidad": o.equipo.torneo.modalidad
+    } for o in ofertas]
+
+    return jsonify(resultados)
+
+
+@api.route("/jugador/aceptar_oferta", methods=["POST"])
+def aceptar_oferta():
+    try:
+        data = request.json
+        oferta_id = data.get("oferta_id")
+
+        if not oferta_id:
+            return jsonify({"error": "Falta el ID de la oferta"}), 400
+
+        oferta = Oferta.query.get(oferta_id)
+        if not oferta:
+            return jsonify({"error": "Oferta no encontrada"}), 404
+
+        modalidad = oferta.equipo.torneo.modalidad.upper()
+
+        existe_equipo = JugadorEquipo.query.filter_by(
+            jugador_id=oferta.jugador_id, 
+            modalidad=modalidad
+        ).first()
+        
+        if existe_equipo:
+            return jsonify({"error": "Este jugador ya tiene equipo en esta modalidad"}), 400
+
+        nuevo_registro = JugadorEquipo(
+            jugador_id=oferta.jugador_id, 
+            equipo_id=oferta.equipo_id, 
+            modalidad=modalidad
+        )
+        db.session.add(nuevo_registro)
+
+        Convocatoria.query.filter_by(jugador_id=oferta.jugador_id, modalidad=modalidad).delete(synchronize_session=False)
+
+        Oferta.query.filter(
+            Oferta.jugador_id == oferta.jugador_id,
+            Oferta.equipo_id.in_(
+                db.session.query(Equipo.id)
+                .join(Torneo)
+                .filter(Torneo.modalidad == modalidad)
+            )
+        ).delete(synchronize_session=False)
+
+        db.session.commit()
+        return jsonify({"message": "Oferta aceptada. El jugador ha sido agregado al equipo y sus convocatorias eliminadas."}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+
+@api.route("/equipos/dt/<int:dt_id>", methods=["GET"])
+@jwt_required()  # Asegura que el DT esté autenticado
+def get_equipos_por_dt(dt_id):
+    try:
+        # Verificar si el jugador con el ID proporcionado es un DT
+        dt = Jugador.query.get(dt_id)
+        if not dt or dt.role != "dt":
+            return jsonify({"mensaje": "No se encontró un DT con ese ID"}), 404
+        
+        # Obtener los equipos asociados al DT
+        equipos = Equipo.query.join(JugadorEquipo).filter(JugadorEquipo.jugador_id == dt_id).all()
+
+        if not equipos:
+            return jsonify({"mensaje": "No se encontraron equipos para este DT"}), 404
+
+        # Serializar los equipos
+        equipos_serializados = [{"id": equipo.id, "nombre": equipo.nombre} for equipo in equipos]
+        
+        return jsonify(equipos_serializados), 200
     
+    except Exception as e:
+        return jsonify({"mensaje": "Error al obtener equipos"}), 500
+    
+
+
+@api.route("/jugadores/rol", methods=["PUT"])
+@jwt_required()
+def gestionar_rol():
+    """Permite a Superadmin cambiar roles de Admins y a Admins asignar roles a Jugadores, Árbitros y DTs"""
+
+    try:
+        jwt_data = get_jwt()  # 🔹 Obtener datos del token
+        user_role = jwt_data.get("role")  
+        usuario_actual_id = get_jwt_identity()
+
+        usuario_actual = Jugador.query.get(usuario_actual_id)
+        if not usuario_actual:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+
+        # 📌 Obtener datos de la petición
+        data = request.get_json()
+        player_id = data.get("id")
+        new_role = data.get("role")
+
+        if not player_id or not new_role:
+            return jsonify({"error": "Faltan datos"}), 400
+
+        # 📌 Buscar al jugador en la base de datos
+        player = Jugador.query.get(player_id)
+        if not player:
+            return jsonify({"error": "Jugador no encontrado"}), 404
+
+        # 🔴 No se puede modificar al Superadmin
+        if player.role == "superadmin":
+            return jsonify({"error": "No puedes modificar al Superadmin"}), 403
+
+        # 🔴 Validar qué roles puede asignar cada uno
+        if user_role == "superadmin":
+            if new_role not in ["admin", "jugador", "dt", "arbitro"]:
+                return jsonify({"error": "Rol inválido"}), 400
+        elif user_role == "admin":
+            if new_role not in ["jugador", "dt", "arbitro"]:
+                return jsonify({"error": "No puedes asignar este rol"}), 403
+        else:
+            return jsonify({"error": "No tienes permisos para cambiar roles"}), 403
+
+        # 📌 Asignar nuevo rol
+        player.role = new_role
+        db.session.commit()
+
+        return jsonify({"mensaje": f"Rol de {player.nickhabbo} actualizado a {new_role}"}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Error en el servidor: {str(e)}"}), 500
+
+
+@api.route('/jugadores/roles', methods=['GET'])
+@jwt_required()
+def get_players_roles():
+    """Lista todos los jugadores con sus IDs, nicks y roles (Solo Admins y Superadmin)"""
+
+    try:
+        user_id = get_jwt_identity()
+        user = Jugador.query.get(user_id)
+
+        # 🔴 Solo Admin o Superadmin pueden acceder
+        if not user or user.role not in ["admin", "superadmin"]:
+            return jsonify({"error": "Acceso denegado"}), 403  
+
+        players = Jugador.query.with_entities(Jugador.id, Jugador.nickhabbo, Jugador.role).all()
+        players_list = [{"id": p.id, "nickhabbo": p.nickhabbo, "role": p.role} for p in players]
+
+        return jsonify(players_list), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Error en el servidor: {str(e)}"}), 500
+
+
 
     
     

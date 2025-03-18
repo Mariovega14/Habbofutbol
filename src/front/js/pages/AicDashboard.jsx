@@ -13,17 +13,17 @@ const AicDashboard = () => {
       </header>
 
       <div className="aic-grid">
-        <div className="aic-card aic-ranking">
+        <div className="aic-card aic-ranking" onClick={() => navigate("/aic/rankings")}>
           <h2>Ranking</h2>
           <p>Consulta las estadísticas de los jugadores y equipos.</p>
         </div>
 
-        <div className="aic-card aic-foro">
-          <h2>Foro</h2>
-          <p>Discute estrategias y novedades con la comunidad.</p>
+        <div className="aic-card aic-foro" onClick={() => navigate("/aic/resumenes")}>
+        <h2>Resumenes</h2>
+        <p>Resumenes Completos de tus Partidos.</p>
         </div>
 
-        <div className="aic-card aic-convocatorias">
+        <div className="aic-card aic-convocatorias" onClick={() => navigate("/aic/convocatorias")}>
           <h2>Convocatorias</h2>
           <p>Publica y busca oportunidades para jugar en torneos.</p>
         </div>

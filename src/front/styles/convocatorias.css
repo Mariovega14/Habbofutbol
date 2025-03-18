@@ -1,0 +1,188 @@
+/* Estilos generales */
+.habbo-convocatorias-container {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background-color: #1e1e1e;
+    color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-top: 30px;
+    overflow-y: auto; /* Habilitar scroll vertical */
+    height: 90vh
+}
+
+.habbo-title {
+    color: #ffffff;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.habbo-subtitle {
+    color: #ffffff;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+/* Formulario para crear convocatorias */
+.habbo-form-container {
+    background-color: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.habbo-textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #444;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    resize: vertical;
+    min-height: 100px;
+    background-color: #333;
+    color: #ffffff;
+}
+
+.habbo-button {
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 1rem;
+    margin-right: 10px;
+}
+
+.habbo-button-primary {
+    background-color: #28a745;
+    color: white;
+}
+
+.habbo-button-primary:hover {
+    background-color: #218838;
+}
+
+.habbo-button-secondary {
+    background-color: #007bff;
+    color: white;
+}
+
+.habbo-button-secondary:hover {
+    background-color: #0056b3;
+}
+
+.habbo-button-success {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.habbo-button-success:hover {
+    background-color: #138496;
+}
+
+.habbo-button-active {
+    background-color: #ffc107;
+    color: black;
+}
+
+/* Lista de Convocatorias y Ofertas */
+.habbo-convocatorias-list, .habbo-ofertas-list {
+    margin-bottom: 30px;
+}
+
+.habbo-card {
+    background-color: #2a2a2a;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px; /* Espacio más compacto */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.habbo-card-text {
+    margin: 0;
+    color: #ffffff;
+}
+
+.habbo-card-text strong {
+    color: #28a745;
+}
+
+.habbo-card-actions {
+    margin-top: 10px;
+}
+
+.habbo-label {
+    display: block;
+    margin-bottom: 5px;
+    color: #ffffff;
+}
+
+.habbo-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #444;
+    border-radius: 5px;
+    background-color: #333;
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+.habbo-no-data {
+    color: #ffffff;
+    text-align: center;
+}
+
+.habbo-loading {
+    color: #ffffff;
+    text-align: center;
+    font-size: 1.2rem;
+}
+
+/* Paginación */
+.habbo-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 20px;
+}
+
+.habbo-pagination button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #444;
+    color: white;
+}
+
+.habbo-pagination button:hover {
+    background-color: #555;
+}
+
+.habbo-pagination .habbo-button-active {
+    background-color: #ffc107;
+    color: black;
+}
+
+/* Filtro de búsqueda */
+.habbo-search-container {
+    margin-bottom: 20px;
+}
+
+.habbo-search-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #444;
+    border-radius: 5px;
+    background-color: #333;
+    color: #ffffff;
+    font-size: 1rem;
+}
+
+.habbo-search-input::placeholder {
+    color: #888;
+}

@@ -5,7 +5,7 @@ import "../../styles/partidos.css";
 const RegistroPartido = () => {
     const { store, actions } = useContext(Context);
 
-    
+
     const [torneoId, setTorneoId] = useState("");
     const [equipoAId, setEquipoAId] = useState("");
     const [equipoBId, setEquipoBId] = useState("");
@@ -20,24 +20,37 @@ const RegistroPartido = () => {
     const [mencionB, setMencionB] = useState("");
     const [observaciones, setObservaciones] = useState("");
     const [linkVideo, setLinkVideo] = useState("");
+    const [jugadoresSeleccionadosA, setJugadoresSeleccionadosA] = useState([]);
+    const [jugadoresSeleccionadosB, setJugadoresSeleccionadosB] = useState([]);
 
-    
+
     useEffect(() => {
         actions.getTorneos();
     }, []);
 
-   
+
     useEffect(() => {
         if (torneoId) {
             actions.getEquiposPorTorneo(torneoId);
         }
     }, [torneoId]);
 
-    
+
     useEffect(() => {
-        if (equipoAId) actions.getJugadoresPorEquipo(equipoAId).then(setJugadoresEquipoA);
-        if (equipoBId) actions.getJugadoresPorEquipo(equipoBId).then(setJugadoresEquipoB);
+        if (equipoAId) {
+            actions.getJugadoresPorEquipo(equipoAId).then((data) => {
+                console.log("Jugadores de equipo A:", data); // Agregar este log
+                setJugadoresEquipoA(data || []);
+            });
+        }
+        if (equipoBId) {
+            actions.getJugadoresPorEquipo(equipoBId).then((data) => {
+                console.log("Jugadores de equipo B:", data); // Agregar este log
+                setJugadoresEquipoB(data || []);
+            });
+        }
     }, [equipoAId, equipoBId]);
+
 
     // Manejar cambios en estadísticas (sin cambios)
     const handleStatChange = (jugadorId, stat, value) => {
@@ -50,7 +63,22 @@ const RegistroPartido = () => {
         });
     };
 
-    
+    const toggleSeleccionJugador = (jugadorId, equipo) => {
+        if (equipo === "A") {
+            setJugadoresSeleccionadosA(prev =>
+                prev.includes(jugadorId)
+                    ? prev.filter(id => id !== jugadorId) // Quita el jugador si ya está en la lista
+                    : [...prev, jugadorId] // Agrega el jugador si no está en la lista
+            );
+        } else {
+            setJugadoresSeleccionadosB(prev =>
+                prev.includes(jugadorId)
+                    ? prev.filter(id => id !== jugadorId)
+                    : [...prev, jugadorId]
+            );
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -90,12 +118,12 @@ const RegistroPartido = () => {
     };
 
     return (
-        <div className="registro-partido-container">
+        <div className="registro-partido">
             <form onSubmit={handleSubmit}>
                 {/* Primera fila: Torneo, Equipo A, Equipo B */}
-                <div className="form-section">
-                    <label>Torneo:</label>
-                    <select value={torneoId} onChange={(e) => setTorneoId(e.target.value)} required>
+                <div className="registro-form-section">
+                    <label className="registro-label">Torneo:</label>
+                    <select className="registro-select" value={torneoId} onChange={(e) => setTorneoId(e.target.value)} required>
                         <option value="">Seleccionar Torneo</option>
                         {store.torneos.map((torneo) => (
                             <option key={torneo.id} value={torneo.id}>{torneo.nombre}</option>
@@ -103,8 +131,8 @@ const RegistroPartido = () => {
                     </select>
                 </div>
 
-                <div className="form-section">
-                    <label>Equipo A:</label>
+                <div className="registro-form-section">
+                    <label className="registro-equiposA">Equipo A:</label>
                     <select value={equipoAId} onChange={(e) => setEquipoAId(e.target.value)} required>
                         <option value="">Seleccionar Equipo A</option>
                         {store.equipos.map((equipo) => (
@@ -114,7 +142,7 @@ const RegistroPartido = () => {
                 </div>
 
                 <div className="form-section">
-                    <label>Equipo B:</label>
+                    <label className="registro-equiposB">Equipo B:</label>
                     <select value={equipoBId} onChange={(e) => setEquipoBId(e.target.value)} required>
                         <option value="">Seleccionar Equipo B</option>
                         {store.equipos.map((equipo) => (
@@ -139,37 +167,77 @@ const RegistroPartido = () => {
                     <input type="number" min="0" value={golesEquipoB} onChange={(e) => setGolesEquipoB(e.target.value)} required />
                 </div>
 
+                <h3 className="titulo-estadistica">Estadísticas</h3>
+
+                {/* Selección de jugadores para el Equipo A */}
+                <div>
+                    <h4>Seleccionar jugadores de Equipo A:</h4>
+                    {jugadoresEquipoA.map((jugador) => (
+                        <label key={jugador.id}>
+                            <input
+                                type="checkbox"
+                                checked={jugadoresSeleccionadosA.includes(jugador.id)}
+                                onChange={() => toggleSeleccionJugador(jugador.id, "A")}
+                            />
+                            {jugador.nickhabbo}
+                        </label>
+                    ))}
+                </div>
+
+                {/* Selección de jugadores para el Equipo B */}
+                <div>
+                    <h4>Seleccionar jugadores de Equipo B:</h4>
+                    {jugadoresEquipoB.map((jugador) => (
+                        <label key={jugador.id}>
+                            <input
+                                type="checkbox"
+                                checked={jugadoresSeleccionadosB.includes(jugador.id)}
+                                onChange={() => toggleSeleccionJugador(jugador.id, "B")}
+                            />
+                            {jugador.nickhabbo}
+                        </label>
+                    ))}
+                </div>
+
                 {/* Tercera fila: Estadísticas de jugadores */}
-                <div className="jugadores-container">
-                    <h3>Estadísticas del Partido</h3>
-                    <div className="equipo">
+                <div className="registro-jugadores-container">
+
+                    <div className="registro-equiposA">
                         <h4>Equipo A</h4>
-                        {jugadoresEquipoA.map((jugador) => (
-                            <div key={jugador.id} className="jugador">
-                                <span>{jugador.nickhabbo}</span>
-                                <input type="number" min="0" placeholder="Goles" onChange={(e) => handleStatChange(jugador.id, "goles", e.target.value)} />
-                                <input type="number" min="0" placeholder="Asistencias" onChange={(e) => handleStatChange(jugador.id, "asistencias", e.target.value)} />
-                                <input type="number" min="0" placeholder="Autogoles" onChange={(e) => handleStatChange(jugador.id, "autogoles", e.target.value)} />
-                            </div>
-                        ))}
+                        {jugadoresSeleccionadosA.map(jugadorId => {
+                            const jugador = jugadoresEquipoA.find(j => j.id === jugadorId);
+                            return (
+                                <div key={jugador.id} className="jugador">
+                                    <span>{jugador.nickhabbo}</span>
+                                    <input type="number" min="0" placeholder="Goles" onChange={(e) => handleStatChange(jugador.id, "goles", e.target.value)} />
+                                    <input type="number" min="0" placeholder="Asistencias" onChange={(e) => handleStatChange(jugador.id, "asistencias", e.target.value)} />
+                                    <input type="number" min="0" placeholder="Autogoles" onChange={(e) => handleStatChange(jugador.id, "autogoles", e.target.value)} />
+                                </div>
+                            );
+                        })}
                     </div>
 
-                    <div className="equipo">
+                    <div className="registro-equiposB">
                         <h4>Equipo B</h4>
-                        {jugadoresEquipoB.map((jugador) => (
-                            <div key={jugador.id} className="jugador">
-                                <span>{jugador.nickhabbo}</span>
-                                <input type="number" min="0" placeholder="Goles" onChange={(e) => handleStatChange(jugador.id, "goles", e.target.value)} />
-                                <input type="number" min="0" placeholder="Asistencias" onChange={(e) => handleStatChange(jugador.id, "asistencias", e.target.value)} />
-                                <input type="number" min="0" placeholder="Autogoles" onChange={(e) => handleStatChange(jugador.id, "autogoles", e.target.value)} />
-                            </div>
-                        ))}
+                        {jugadoresSeleccionadosB.map(jugadorId => {
+                            const jugador = jugadoresEquipoB.find(j => j.id === jugadorId);
+                            return (
+                                <div key={jugador.id} className="registro-jugador">
+                                    <span>{jugador.nickhabbo}</span>
+                                    <input type="number" min="0" placeholder="Goles" onChange={(e) => handleStatChange(jugador.id, "goles", e.target.value)} />
+                                    <input type="number" min="0" placeholder="Asistencias" onChange={(e) => handleStatChange(jugador.id, "asistencias", e.target.value)} />
+                                    <input type="number" min="0" placeholder="Autogoles" onChange={(e) => handleStatChange(jugador.id, "autogoles", e.target.value)} />
+                                </div>
+                            );
+                        })}
                     </div>
+
                 </div>
+
 
                 {/* Cuarta fila: MVP, Menciones, Observaciones, Link de Video */}
                 <div className="form-section">
-                    <label>MVP del Partido:</label>
+                    <label>MVP:</label>
                     <select value={mvp} onChange={(e) => setMvp(e.target.value)} required>
                         <option value="">Seleccionar MVP</option>
                         {[...jugadoresEquipoA, ...jugadoresEquipoB].map((jugador) => (
@@ -179,7 +247,7 @@ const RegistroPartido = () => {
                 </div>
 
                 <div className="form-section">
-                    <label>Mención Especial Equipo A:</label>
+                    <label>Mención A:</label>
                     <select value={mencionA} onChange={(e) => setMencionA(e.target.value)} required>
                         <option value="">Seleccionar Jugador del Equipo A</option>
                         {jugadoresEquipoA.map((jugador) => (
@@ -189,7 +257,7 @@ const RegistroPartido = () => {
                 </div>
 
                 <div className="form-section">
-                    <label>Mención Especial Equipo B:</label>
+                    <label>Mención B:</label>
                     <select value={mencionB} onChange={(e) => setMencionB(e.target.value)} required>
                         <option value="">Seleccionar Jugador del Equipo B</option>
                         {jugadoresEquipoB.map((jugador) => (
@@ -199,17 +267,17 @@ const RegistroPartido = () => {
                 </div>
 
                 <div className="form-section">
-                    <label>Observaciones del Juez:</label>
+                    <label>Observaciones:</label>
                     <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} />
                 </div>
 
                 <div className="form-section">
-                    <label>Enlace de Video (Opcional):</label>
+                    <label>Enlace (Opcional):</label>
                     <input type="text" value={linkVideo} onChange={(e) => setLinkVideo(e.target.value)} />
                 </div>
 
                 {/* Botón de enviar */}
-                <button type="submit">Registrar Partido</button>
+                <button type="submit" className="registro-button">Registrar Partido</button>
             </form>
         </div>
     );

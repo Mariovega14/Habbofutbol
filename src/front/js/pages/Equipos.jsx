@@ -13,6 +13,7 @@ const Equipos = () => {
   const [showEquipoModal, setShowEquipoModal] = useState(false);
   const [nombreEquipo, setNombreEquipo] = useState("");
   const [torneoId, setTorneoId] = useState("");
+  const [logo, setLogo] = useState(null);
 
   // ✅ Estado para el modal de confirmación de eliminación
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -54,27 +55,30 @@ const Equipos = () => {
 
   // ✅ Crear equipo
   const handleCrearEquipo = async () => {
-    if (!nombreEquipo.trim() || !torneoId) {
-      alert("Por favor, completa todos los campos.");
-      return;
+    const datosEquipo = {
+        nombre: nombreEquipo.trim(), // Elimina espacios innecesarios
+        torneo_id: torneoId,
+        logo: logo // Agregar el archivo de imagen si está seleccionado
+    };
+
+    console.log("Datos enviados al backend:", datosEquipo); // Debug
+
+    if (!datosEquipo.nombre || !datosEquipo.torneo_id) {
+        console.error("Datos incorrectos:", datosEquipo);
+        return;
     }
 
-    const resultado = await actions.crearEquipo({
-      nombre: nombreEquipo,
-      torneo_id: torneoId,
-    });
+    const resultado = await actions.crearEquipo(datosEquipo); // ✅ CORREGIDO
+    console.log("Resultado:", resultado);
 
     if (resultado.success) {
-      alert("Equipo creado exitosamente");
-      actions.getEquipos(); // Refrescar lista
+        setShowEquipoModal(false); // Cerrar modal si se crea exitosamente
+        actions.getEquipos(); // Recargar lista de equipos
     } else {
-      alert(resultado.message);
+        alert(resultado.message); // Mostrar mensaje de error
     }
+};
 
-    setShowEquipoModal(false);
-    setNombreEquipo("");
-    setTorneoId("");
-  };
 
   return (
     <div className="equipos-container">
@@ -182,6 +186,11 @@ const Equipos = () => {
                 </option>
               ))}
             </select>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setLogo(e.target.files[0])}
+            />
             <div className="modal-buttons">
               <button className="btn-guardar" onClick={handleCrearEquipo}>Guardar</button>
               <button className="btn-cerrar" onClick={() => setShowEquipoModal(false)}>Cancelar</button>

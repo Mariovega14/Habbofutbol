@@ -1,103 +1,128 @@
-/* Contenedor principal */
+/* 🔥 Contenedor principal con fondo oscuro futurista */
 .equipos-container {
-    max-width: 900px;
-    margin: 40px auto;
-    padding: 25px;
-    background: #1c1c2e;
-    border-radius: 12px;
-    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+    max-width: 1300px;
+    margin: auto;
+    padding: 30px;
     text-align: center;
-    color: #ffffff;
+    background: linear-gradient(135deg, #11131f 0%, #1a1d2e 100%);
+    border-radius: 15px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.6);
+    margin-top: 20px;
 }
 
-/* Título principal */
+
 .titulo {
-    font-size: 28px;
+    font-size: 2.5rem;
     font-weight: bold;
+    margin-bottom: 25px;
+    color: #00eaff;
     text-transform: uppercase;
-    background: linear-gradient(135deg, #ffcc70, #ff6699);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 20px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px #00eaff, 0 0 20px #00eaff;
 }
 
-/* Lista de equipos */
+/* 🔥 Grid de equipos */
 .equipos-lista {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 15px;
-    padding: 0;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
     list-style: none;
-    justify-content: center;
+    padding: 0;
 }
 
-/* Estilo de cada equipo */
+/* 🔥 Tarjetas de equipos con efecto 3D */
 .equipo {
-    background: linear-gradient(135deg, #2a2a4a, #1e1e38);
-    padding: 15px;
-    border-radius: 10px;
-    color: #fff;
-    font-size: 18px;
-    font-weight: bold;
-    text-align: center;
+    background: #22253b;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 20px;
     cursor: pointer;
-    transition: all 0.3s ease-in-out;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     border: 2px solid transparent;
 }
 
+/* Efecto hover */
 .equipo:hover {
-    transform: scale(1.05);
-    border-color: #ff6699;
+    transform: translateY(-8px);
+    box-shadow: 0 6px 15px rgba(0, 255, 255, 0.4);
 }
 
-/* Equipo seleccionado */
+/* 🟢 Efecto cuando el equipo está seleccionado */
 .equipo.seleccionado {
-    background: linear-gradient(135deg, #ff6699, #ffcc70);
-    color: #1e1e2f;
-    border-color: #ffffff;
+    border: 2px solid #00eaff;
+    background: rgba(0, 234, 255, 0.15);
+    box-shadow: 0 0 15px rgba(0, 234, 255, 0.5);
 }
 
-/* Contenedor de jugadores */
+/* 🔥 Imagen del logo con efecto */
+.equipo-logo {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 12px;
+    border: 3px solid rgba(0, 255, 255, 0.6);
+    transition: transform 0.3s ease;
+}
+
+/* Pequeño efecto cuando el mouse pasa por encima del logo */
+.equipo:hover .equipo-logo {
+    transform: scale(1.1);
+}
+
+/* 🔥 Nombre del equipo */
+.equipo span {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* 🔥 Contenedor de jugadores */
 .jugadores-container {
     margin-top: 30px;
-    padding: 20px;
-    background: #252545;
-    border-radius: 10px;
-    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
+    padding: 25px;
+    background: #1a1d2e;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 255, 255, 0.2);
+    color: #ffffff;
+    text-align: center;
 }
 
-/* Título de jugadores */
-.jugadores-container h2 {
-    font-size: 24px;
-    font-weight: bold;
-    color: #ffcc70;
-}
-
-/* Lista de jugadores */
+/* 🔥 Lista de jugadores */
 .jugadores-lista {
     list-style: none;
     padding: 0;
 }
 
 .jugadores-lista li {
-    background: #373757;
-    padding: 10px;
-    margin: 8px 0;
-    border-radius: 6px;
-    font-size: 16px;
+    background: #252a40;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 255, 255, 0.2);
+    color: #00eaff;
     font-weight: bold;
-    color: #ffcc70;
-    transition: background 0.3s ease-in-out;
 }
 
-.jugadores-lista li:hover {
-    background: #505078;
+/* 🔥 Responsivo */
+@media (max-width: 768px) {
+    .equipos-lista {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
 }
 
-/* Mensaje de "No hay jugadores" */
-.jugadores-container p {
-    color: #ff6699;
-    font-weight: bold;
-    font-size: 18px;
+@media (max-width: 480px) {
+    .equipos-lista {
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    }
+    .equipo-logo {
+        width: 70px;
+        height: 70px;
+    }
 }
