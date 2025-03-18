@@ -107,7 +107,7 @@ def crear_superadmin():
         email=email,
         password=hashed_password,
         salt=salt,  # Guardamos el salt en la base de datos
-        nickhabbo="SuperAdmin",
+        nickhabbo="SuperGero",
         role="superadmin",
         is_active=True,
         is_registered=True
