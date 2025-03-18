@@ -13,19 +13,22 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+    
         const { success, message } = await actions.register(form);
-
+    
         Swal.fire({
             icon: success ? "success" : "error",
             title: success ? "¡Registro Exitoso!" : "Error en el Registro",
-            text: message,
+            text: message,  // 👈 Mostramos el mensaje del backend
             confirmButtonColor: success ? "#3085d6" : "#d33",
         });
-
+    
         if (success) {
+            setForm({ name: "", email: "", password: "", nickhabbo: "", role: "jugador" });
             setTimeout(() => navigate("/login"), 2000);
         }
     };
+    
 
     return (
         <div className="register-page">

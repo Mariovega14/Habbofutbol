@@ -1,4 +1,5 @@
 from flask import jsonify, url_for, request
+import re
 
 class APIException(Exception):
     status_code = 400
@@ -19,6 +20,12 @@ def has_no_empty_params(rule):
     defaults = rule.defaults if rule.defaults is not None else ()
     arguments = rule.arguments if rule.arguments is not None else ()
     return len(defaults) >= len(arguments)
+
+
+
+def is_valid_password(password):
+    """Verifica que la contraseña tenga al menos una letra y un número."""
+    return bool(re.search(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$', password))
 
 def generate_sitemap(app):
     links = ['/admin/']

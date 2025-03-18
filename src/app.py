@@ -6,14 +6,17 @@ from flask import Flask, request, jsonify, url_for, send_from_directory
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from api.utils import APIException, generate_sitemap
-from api.models import db
+from api.models import db, Jugador
 from api.routes import api
 from api.admin import setup_admin
 from api.commands import setup_commands
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from dotenv import load_dotenv
+from werkzeug.security import generate_password_hash
+from base64 import b64encode
 
-
+load_dotenv()
 
 ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
 static_file_dir = os.path.join(os.path.dirname(
@@ -57,6 +60,10 @@ def handle_invalid_usage(error):
 
 # generate sitemap with all your endpoints
 
+  # Cargar variables de entorno
+
+
+
 
 @app.route('/')
 def sitemap():
@@ -72,6 +79,46 @@ def serve_any_other_file(path):
     response = send_from_directory(static_file_dir, path)
     response.cache_control.max_age = 0  # avoid cache memory
     return response
+
+def crear_superadmin():
+    email = os.getenv("SUPERADMIN_EMAIL")
+    password = os.getenv("SUPERADMIN_PASSWORD")
+
+    if not email or not password:
+        print("⚠️ Faltan variables de entorno para el superadmin")
+        return
+
+    print(f"🔍 Buscando superadmin con email: {email}")
+    superadmin = Jugador.query.filter_by(role="superadmin").first()
+
+    if superadmin:
+        print(f"⚠️ Superadmin ya existe: {superadmin.email}")
+        return
+
+    # Generar un salt aleatorio de 8 caracteres
+    salt = b64encode(os.urandom(32)).decode("utf-8")
+
+    # Hashear la contraseña con el salt concatenado
+    hashed_password = generate_password_hash(f"{password}{salt}")
+
+    print("🆕 Creando superadmin...")
+    superadmin = Jugador(
+        name="Gero",
+        email=email,
+        password=hashed_password,
+        salt=salt,  # Guardamos el salt en la base de datos
+        nickhabbo="SuperAdmin",
+        role="superadmin",
+        is_active=True,
+        is_registered=True
+    )
+
+    db.session.add(superadmin)
+    db.session.commit()
+    print("✅ Superadmin creado con éxito")
+
+with app.app_context():
+    crear_superadmin()
 
 
 # this only runs if `$ python src/main.py` is executed

@@ -7,17 +7,32 @@ const getState = ({ getStore, getActions, setStore }) => {
             torneos: [],
             equipos: [],
             partidos: [],
-            asistencias: [] ,// Nuevo estado para las asistencias
+            asistencias: [],// Nuevo estado para las asistencias
             tablaGoleadores: [],
             tablaAsistidores: [],
             tablaEquipos: [],
             torneoSeleccionado: null,
             tablaMvps: [],
-    tablaMenciones: [],
-            },
+            tablaMenciones: [],
+            convocatorias: [],
+            ofertas: [],
+            playersWithRoles: []
+        },
         actions: {
             register: async (playerData) => {
                 try {
+                    // 1️⃣ Verificar que no haya campos vacíos
+                    if (!playerData.name || !playerData.email || !playerData.password || !playerData.nickhabbo) {
+                        return { success: false, message: "Todos los campos son obligatorios" };
+                    }
+
+                    // 2️⃣ Validar que la contraseña tenga letras y números
+                    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+                    if (!passwordRegex.test(playerData.password)) {
+                        return { success: false, message: "La contraseña debe tener al menos 6 caracteres, incluyendo letras y números" };
+                    }
+
+                    // 3️⃣ Enviar la solicitud al backend
                     const response = await fetch(`${process.env.BACKEND_URL}/register`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -27,18 +42,20 @@ const getState = ({ getStore, getActions, setStore }) => {
                     const data = await response.json();
                     console.log("Respuesta del backend:", data);
 
+
                     if (!response.ok) {
                         console.error("Error en register:", data.message);
                         return { success: false, message: data.message || "Error desconocido" };
                     }
 
-                    return { success: true, message: data.message };
+                    return { success: true, message: "¡Registro exitoso! Redirigiendo..." };
 
                 } catch (error) {
                     console.error("Error en register:", error);
                     return { success: false, message: "Error de conexión con el servidor" };
                 }
             },
+
 
             crearTorneo: async (nombre, modalidad, formato) => {
                 const store = getStore();
@@ -82,7 +99,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     if (!token) {
                         return { success: false, message: "No estás autenticado" };
                     }
-            
+
                     const response = await fetch(`${process.env.BACKEND_URL}/jugadores/admin`, { // ✅ CORREGIDO
                         method: "POST",
                         headers: {
@@ -91,23 +108,23 @@ const getState = ({ getStore, getActions, setStore }) => {
                         },
                         body: JSON.stringify({ nickhabbo }),
                     });
-            
+
                     const data = await response.json();
                     console.log("Respuesta del servidor:", data); // Depuración
-            
+
                     if (!response.ok) {
                         console.error("Error en createPlayerByAdmin:", data.error);
                         return { success: false, message: data.error || "Error desconocido" };
                     }
-            
+
                     return { success: true, message: "Jugador creado correctamente" };
-            
+
                 } catch (error) {
                     console.error("Error en createPlayerByAdmin:", error);
                     return { success: false, message: "Error de conexión con el servidor" };
                 }
             },
-            
+
 
             login: async (email, password) => {
                 try {
@@ -122,7 +139,14 @@ const getState = ({ getStore, getActions, setStore }) => {
                     if (response.ok) {
                         localStorage.setItem("token", data.token);
                         localStorage.setItem("role", data.role);
-                        setStore({ token: data.token, role: data.role });
+                        localStorage.setItem("jugadorId", data.id);  // 🔹 Usa 'id' en lugar de 'jugador_id'
+
+                        setStore({
+                            token: data.token,
+                            role: data.role,
+                            jugadorId: data.id  // 🔹 Guarda correctamente en el store
+                        });
+
                         return { success: true, message: "Inicio de sesión exitoso" };
                     } else {
                         return { success: false, message: data.message || "Credenciales incorrectas." };
@@ -132,10 +156,13 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
+
+
             logout: () => {
                 localStorage.removeItem("token");
                 localStorage.removeItem("role");
-                setStore({ token: null, role: null });
+                localStorage.removeItem("jugadorId");
+                setStore({ token: null, role: null, jugadorId: null });
                 window.location.href = "/";
             },
 
@@ -149,9 +176,9 @@ const getState = ({ getStore, getActions, setStore }) => {
                             "Authorization": `Bearer ${token}` // Incluir el token
                         }
                     });
-            
+
                     const data = await response.json();
-            
+
                     if (response.ok) {
                         setStore({ asistencias: data.reverse() });
                     } else {
@@ -170,23 +197,23 @@ const getState = ({ getStore, getActions, setStore }) => {
                             "Content-Type": "application/json",
                         },
                     });
-            
+
                     if (!resp.ok) {
                         const errorData = await resp.json().catch(() => ({})); // Manejar errores en JSON
                         console.error(`Error al obtener los jugadores: ${resp.status} - ${errorData.error || "Error desconocido"}`);
                         setStore({ jugadores: [] });
                         return;
                     }
-            
+
                     const data = await resp.json();
                     setStore({ jugadores: data || [] });
-            
+
                 } catch (error) {
                     console.error("Error en getJugadores:", error);
                     setStore({ jugadores: [] });
                 }
             },
-            
+
 
 
 
@@ -258,12 +285,12 @@ const getState = ({ getStore, getActions, setStore }) => {
                     if (datos.logo) {
                         formData.append("logo", datos.logo);
                     }
-            
+
                     const resp = await fetch(`${process.env.BACKEND_URL}/equipos`, {
                         method: "POST",
                         body: formData,
                     });
-            
+
                     const data = await resp.json();
                     return { success: resp.ok, message: data.message || data.error };
                 } catch (error) {
@@ -284,8 +311,8 @@ const getState = ({ getStore, getActions, setStore }) => {
                     console.error("❌ Error al conectar con el servidor:", error);
                 }
             },
-            
-            
+
+
 
             getEquipos: async () => {
                 try {
@@ -326,7 +353,7 @@ const getState = ({ getStore, getActions, setStore }) => {
             removePlayerFromTeam: async (playerId, teamId) => {
                 try {
                     console.log("Intentando eliminar equipo:", { playerId, teamId }); // 🛠 Depuración
-            
+
                     const response = await fetch(process.env.BACKEND_URL + "/remove_team", {
                         method: "DELETE",
                         headers: {
@@ -334,20 +361,20 @@ const getState = ({ getStore, getActions, setStore }) => {
                         },
                         body: JSON.stringify({ player_id: playerId, team_id: teamId })
                     });
-            
+
                     if (!response.ok) throw new Error("Error al eliminar el equipo.");
-            
+
                     const data = await response.json();
                     console.log("Equipo eliminado:", data); // 🛠 Depuración
-            
+
                     getActions().getJugadores(); // Actualiza la lista de jugadores
                     return data;
                 } catch (error) {
                     console.error("Error al eliminar equipo:", error);
                 }
             },
-            
-            
+
+
 
 
             addPlayerToTeam: async (jugadorId, equipoId) => {
@@ -364,13 +391,13 @@ const getState = ({ getStore, getActions, setStore }) => {
                             equipo_id: equipoId
                         }),
                     });
-            
+
                     const data = await response.json();
-            
+
                     if (!response.ok) {
                         throw new Error(data.error || "Error al añadir jugador al equipo");
                     }
-            
+
                     alert("Jugador añadido correctamente");
                     return data;
                 } catch (error) {
@@ -378,7 +405,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     alert("Error al añadir jugador");
                 }
             },
-                        
+
 
 
 
@@ -410,9 +437,9 @@ const getState = ({ getStore, getActions, setStore }) => {
                     console.error('Error:', error);
                     return false;
                 }
-            }, 
+            },
 
-            
+
             deletePlayer: async (playerId) => {
                 try {
                     const token = localStorage.getItem("token");
@@ -517,42 +544,42 @@ const getState = ({ getStore, getActions, setStore }) => {
                 try {
                     const response = await fetch(process.env.BACKEND_URL + "/partidos");
                     if (!response.ok) throw new Error("Error al obtener los resúmenes");
-            
+
                     const data = await response.json();
                     setStore({ partidos: data });
                 } catch (error) {
                     console.error("Error al obtener los resúmenes:", error);
                 }
             },
-            
-            
-            
+
+
+
 
             getJugadoresPorEquipo: async (equipoId) => {
                 try {
                     console.log("Solicitando jugadores para equipo ID:", equipoId);
-            
+
                     const resp = await fetch(`${process.env.BACKEND_URL}/equipos/${equipoId}/jugadores`);
-            
+
                     if (!resp.ok) {
                         throw new Error(`Error en la solicitud: ${resp.status}`);
                     }
-            
+
                     // Usar `resp.clone().text()` para debug, pero sin consumir el stream
                     const respText = await resp.clone().text();
                     console.log("API Response (raw):", respText);
-            
+
                     const data = await resp.json(); // Se llama solo una vez
                     console.log("Jugadores recibidos:", data);
-            
+
                     return data.jugadores || [];
                 } catch (error) {
                     console.error("Error al obtener jugadores del equipo:", error);
                     return [];
                 }
             },
-            
-            
+
+
 
             obtenerEquiposPorModalidad: async (modalidad) => {
                 try {
@@ -566,8 +593,8 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
-            
-            
+
+
             setTorneoSeleccionado: (torneo) => {
                 console.log("📌 Torneo seleccionado:", torneo);
                 setStore({ torneoSeleccionado: torneo });
@@ -578,9 +605,9 @@ const getState = ({ getStore, getActions, setStore }) => {
                 try {
                     console.log(`⚽ Fetch tabla goleadores para Torneo ID: ${torneoId}`);
                     const response = await fetch(`${process.env.BACKEND_URL}/tablas/goleadores/${torneoId}`);
-                    
+
                     if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-                    
+
                     const data = await response.json();
                     console.log("✅ Tabla de goleadores recibida:", data);
                     setStore({ tablaGoleadores: data });
@@ -595,9 +622,9 @@ const getState = ({ getStore, getActions, setStore }) => {
                 try {
                     console.log(`🎯 Fetch tabla asistidores para Torneo ID: ${torneoId}`);
                     const response = await fetch(`${process.env.BACKEND_URL}/tablas/asistidores/${torneoId}`);
-                    
+
                     if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-                    
+
                     const data = await response.json();
                     console.log("✅ Tabla de asistidores recibida:", data);
                     setStore({ tablaAsistidores: data });
@@ -612,18 +639,18 @@ const getState = ({ getStore, getActions, setStore }) => {
                 try {
                     console.log(`📊 Fetch tabla posiciones para Torneo ID: ${torneoId}`);
                     const response = await fetch(`${process.env.BACKEND_URL}/tablas/posiciones/${torneoId}`);
-                    
+
                     // 🔥 Verificar si la respuesta es HTML en lugar de JSON
                     const textResponse = await response.text();
                     console.log("📩 Respuesta recibida:", textResponse);
-            
+
                     if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-            
+
                     // Intentar parsear como JSON
                     const data = JSON.parse(textResponse);
                     console.log("✅ Tabla de posiciones recibida:", data);
                     setStore({ tablaEquipos: data });
-            
+
                 } catch (error) {
                     console.error("❌ Error en getTablaEquiposPorTorneo:", error);
                 }
@@ -636,7 +663,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     const response = await fetch(`${process.env.BACKEND_URL}/torneos?modalidad=${modalidad}`);
 
                     if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-                    
+
                     const data = await response.json();
                     console.log("✅ Torneos recibidos:", data);
                     setStore({ torneos: data });
@@ -651,7 +678,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     console.log("🏆 Fetch tabla MVPs...");
                     const response = await fetch(`${process.env.BACKEND_URL}/tablas/mvps`);
                     if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-            
+
                     const data = await response.json();
                     console.log("✅ Tabla MVPs recibida:", data);
                     setStore({ tablaMvps: data });
@@ -659,13 +686,13 @@ const getState = ({ getStore, getActions, setStore }) => {
                     console.error("Error en getTablaMvps:", error);
                 }
             },
-            
+
             getTablaMenciones: async () => {
                 try {
                     console.log("🎖️ Fetch tabla menciones...");
                     const response = await fetch(`${process.env.BACKEND_URL}/tablas/menciones`);
                     if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-            
+
                     const data = await response.json();
                     console.log("✅ Tabla de menciones recibida:", data);
                     setStore({ tablaMenciones: data });
@@ -673,9 +700,199 @@ const getState = ({ getStore, getActions, setStore }) => {
                     console.error("Error en getTablaMenciones:", error);
                 }
             },
+
+            getConvocatorias: async (modalidad) => {
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/convocatorias/${modalidad}`);
+                    const data = await response.json();
             
+                    if (!response.ok) throw new Error("Error al obtener convocatorias");
             
+                    setStore({ convocatorias: data }); // Guardamos las convocatorias en el store
+                } catch (error) {
+                    alert("Hubo un problema al obtener las convocatorias. Inténtalo de nuevo más tarde.");
+                }
+            },
             
+            crearConvocatoria: async (jugadorId, mensaje, modalidad) => {
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/jugador/crear_convocatoria`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            jugador_id: jugadorId,
+                            mensaje,
+                            modalidad
+                        }),
+                    });
+            
+                    const data = await response.json();
+            
+                    if (!response.ok) {
+                        throw new Error(data.error || "Error al crear la convocatoria");
+                    }
+            
+                    alert("Convocatoria creada con éxito.");
+                    getActions().getConvocatorias(modalidad); // Recargar convocatorias de la modalidad actual
+                } catch (error) {
+                    alert(error.message); // Mostrar mensaje de error al usuario
+                }
+            },
+            
+            getOfertas: async (jugadorId, modalidad) => {
+                try {
+                    if (!jugadorId || !modalidad) {
+                        throw new Error("Datos incompletos. No se pueden obtener las ofertas.");
+                    }
+            
+                    const response = await fetch(`${process.env.BACKEND_URL}/jugador/${jugadorId}/ofertas/${modalidad}`);
+                    const data = await response.json();
+            
+                    if (!response.ok) {
+                        throw new Error(data.error || "Error al obtener ofertas");
+                    }
+            
+                    setStore({ ofertas: data });
+                } catch (error) {
+                    alert(error.message); // Mostrar mensaje de error al usuario
+                    setStore({ ofertas: [] }); // Limpiar ofertas en caso de error
+                }
+            },
+            
+            enviarOferta: async (dtId, jugadorId, equipoId) => {
+                try {
+                    if (!dtId || !jugadorId || !equipoId) {
+                        throw new Error("Faltan datos obligatorios para enviar la oferta.");
+                    }
+            
+                    const response = await fetch(process.env.BACKEND_URL + "/dt/ofertar", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ dt_id: dtId, jugador_id: jugadorId, equipo_id: equipoId })
+                    });
+            
+                    const data = await response.json();
+            
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+            
+                    alert("Oferta enviada con éxito.");
+                    return data;
+                } catch (error) {
+                    alert(error.message); // Mostrar mensaje de error al usuario
+                    return { error: error.message };
+                }
+            },
+            
+            aceptarOferta: async (ofertaId, jugadorId, modalidad) => {
+                try {
+                    const response = await fetch(process.env.BACKEND_URL + "/jugador/aceptar_oferta", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ oferta_id: ofertaId })
+                    });
+            
+                    const data = await response.json();
+            
+                    if (!response.ok) {
+                        throw new Error(data.error || "Error al aceptar la oferta");
+                    }
+            
+                    // Recargar ofertas y convocatorias después de aceptar la oferta
+                    getActions().getOfertas(jugadorId, modalidad);
+                    getActions().getConvocatorias(modalidad);
+            
+                    return data;
+                } catch (error) {
+                    alert(error.message); // Mostrar mensaje de error al usuario
+                    return { success: false, message: error.message };
+                }
+            },
+            
+            getEquiposPorDT: async (dtId) => {
+                try {
+                    const token = localStorage.getItem("token");
+                    if (!token) {
+                        throw new Error("No hay token disponible. Por favor, inicia sesión nuevamente.");
+                    }
+            
+                    const role = localStorage.getItem("role");
+                    if (!role || role.toLowerCase() !== "dt") {
+                        throw new Error("No tienes permisos para acceder a esta información.");
+                    }
+            
+                    const response = await fetch(`${process.env.BACKEND_URL}/equipos/dt/${dtId}`, {
+                        method: "GET",
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json"
+                        }
+                    });
+            
+                    if (!response.ok) {
+                        throw new Error(`Error al obtener los equipos: ${response.status}`);
+                    }
+            
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    alert(error.message); // Mostrar mensaje de error al usuario
+                    return []; // Retornar un arreglo vacío en caso de error
+                }
+            },
+
+            getPlayersWithRoles: async () => {
+                try {
+                    const token = localStorage.getItem("token");
+                    const response = await fetch(process.env.BACKEND_URL + "/jugadores/roles", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+            
+                    if (!response.ok) throw new Error("Error al obtener los jugadores");
+            
+                    const data = await response.json();
+                    console.log("✅ Jugadores obtenidos:", data); // 👀 Ver qué llega
+            
+                    setStore({ playersWithRoles: data });
+            
+                } catch (error) {
+                    console.error("❌ Error al obtener jugadores con roles:", error);
+                }
+            },
+
+            // Cambiar rol de un usuario
+            updatePlayerRole: async (playerId, newRole) => {
+                try {
+                    const token = localStorage.getItem("token");
+                    const response = await fetch(`${process.env.BACKEND_URL}/jugadores/rol`, { // 🔥 URL corregida
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ id: playerId, role: newRole }) // ✅ El backend espera un objeto con "id" y "role"
+                    });
+            
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.error || "Error desconocido");
+            
+                    console.log("✅ Rol actualizado:", result);
+            
+                    getActions().getPlayersWithRoles(); // 🔄 Refrescar lista después de actualizar
+                } catch (error) {
+                    console.error("❌ Error al actualizar rol:", error);
+                }
+            }
+
+
+
+
+
 
 
 

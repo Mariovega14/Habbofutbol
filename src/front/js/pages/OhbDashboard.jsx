@@ -23,7 +23,7 @@ const OhbDashboard = () => {
             <p>Resumos completos dos seus jogos.</p>
         </div>
 
-        <div className="ohb-card ohb-convocatorias">
+        <div className="ohb-card ohb-convocatorias"onClick={() => navigate("/ohb/convocatorias")}>
           <h2>Convocatórias</h2>
           <p>Publique e encontre oportunidades para jogar torneios.</p>
         </div>

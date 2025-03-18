@@ -23,7 +23,7 @@ const HesDashboard = () => {
           <p>Resumenes Completos de tus Partidos.</p>
         </div>
 
-        <div className="hes-card hes-convocatorias">
+        <div className="hes-card hes-convocatorias" onClick={() => navigate("/hes/convocatorias")}>
           <h2>Convocatorias</h2>
           <p>Publica y busca oportunidades para jugar en torneos.</p>
         </div>

@@ -23,7 +23,7 @@ const AicDashboard = () => {
         <p>Resumenes Completos de tus Partidos.</p>
         </div>
 
-        <div className="aic-card aic-convocatorias">
+        <div className="aic-card aic-convocatorias" onClick={() => navigate("/aic/convocatorias")}>
           <h2>Convocatorias</h2>
           <p>Publica y busca oportunidades para jugar en torneos.</p>
         </div>

@@ -22,7 +22,7 @@ const HFADashboard = () => {
           <p>Resumenes Completos de tus Partidos.</p>
         </div>
 
-        <div className="hfa-card hfa-convocatorias">
+        <div className="hfa-card hfa-convocatorias" onClick={() => navigate("/hfa/convocatorias")}>
           <h2>Convocatorias</h2>
           <p>Publica y busca oportunidades para jugar en torneos.</p>
         </div>
