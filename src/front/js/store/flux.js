@@ -904,51 +904,55 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
-            obtenerNoticias: async () => {
-                try {
-                    const response = await fetch(`${process.env.BACKEND_URL}/noticias`);
-                    if (!response.ok) throw new Error("Error al obtener noticias");
-                    const data = await response.json();
-                    setStore({ noticias: data });
-                } catch (error) {
-                    console.error("Error al obtener noticias:", error);
-                }
-            },
-
             crearNoticia: async (titulo, contenido, imagenUrl) => {
                 try {
+                    const token = localStorage.getItem("token"); // 🔹 Obtiene el token almacenado
                     const response = await fetch(`${process.env.BACKEND_URL}/noticias`, {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`  // 🔹 Agrega el token aquí
+                        },
                         body: JSON.stringify({ titulo, contenido, imagenUrl })
                     });
                     if (!response.ok) throw new Error("Error al crear noticia");
+            
                     getActions().obtenerNoticias();
                 } catch (error) {
                     console.error("Error al crear noticia:", error);
                 }
             },
-
+            
             editarNoticia: async (id, titulo, contenido, imagenUrl) => {
                 try {
+                    const token = localStorage.getItem("token"); // 🔹 Obtiene el token
                     const response = await fetch(`${process.env.BACKEND_URL}/noticias/${id}`, {
                         method: "PUT",
-                        headers: { "Content-Type": "application/json" },
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`  // 🔹 Agrega el token aquí
+                        },
                         body: JSON.stringify({ titulo, contenido, imagenUrl })
                     });
                     if (!response.ok) throw new Error("Error al editar noticia");
+            
                     getActions().obtenerNoticias();
                 } catch (error) {
                     console.error("Error al editar noticia:", error);
                 }
             },
-
+            
             eliminarNoticia: async (id) => {
                 try {
+                    const token = localStorage.getItem("token"); // 🔹 Obtiene el token
                     const response = await fetch(`${process.env.BACKEND_URL}/noticias/${id}`, {
-                        method: "DELETE"
+                        method: "DELETE",
+                        headers: {
+                            "Authorization": `Bearer ${token}`  // 🔹 Agrega el token aquí
+                        }
                     });
                     if (!response.ok) throw new Error("Error al eliminar noticia");
+            
                     getActions().obtenerNoticias();
                 } catch (error) {
                     console.error("Error al eliminar noticia:", error);

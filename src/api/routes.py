@@ -1140,11 +1140,7 @@ def crear_noticia():
     if not data or not data.get("titulo") or not data.get("contenido"):
         return jsonify({"error": "Título y contenido son obligatorios"}), 400
 
-    # Verificar si el usuario es admin o superadmin
-    claims = get_jwt()
-    if not any(role in claims.get("roles", []) for role in ["admin", "superadmin"]):
-        return jsonify({"error": "No tienes permiso para crear noticias"}), 403
-
+    
     nueva_noticia = Noticia(
         titulo=data["titulo"],
         contenido=data["contenido"],
@@ -1187,10 +1183,6 @@ def editar_noticia(noticia_id):
     if not noticia:
         return jsonify({"error": "Noticia no encontrada"}), 404
 
-    # Verificar si el usuario es admin o superadmin
-    claims = get_jwt()  # Obtener los claims del token JWT
-    if not any(role in claims.get("roles", []) for role in ["admin", "superadmin"]):  
-        return jsonify({"error": "No tienes permiso para editar noticias"}), 403
 
     noticia.titulo = data.get("titulo", noticia.titulo)
     noticia.contenido = data.get("contenido", noticia.contenido)
@@ -1210,10 +1202,7 @@ def eliminar_noticia(noticia_id):
     if not noticia:
         return jsonify({"error": "Noticia no encontrada"}), 404
 
-    # Verificar si el usuario es admin o superadmin
-    claims = get_jwt()
-    if not any(role in claims.get("roles", []) for role in ["admin", "superadmin"]):
-        return jsonify({"error": "No tienes permiso para eliminar noticias"}), 403
+    
 
     db.session.delete(noticia)
     db.session.commit()
