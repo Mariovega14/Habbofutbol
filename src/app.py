@@ -114,17 +114,7 @@ def crear_superadmin():
     # Hashear la contraseña con el salt concatenado
     hashed_password = generate_password_hash(f"{password}{salt}")
 
-    print("🆕 Creando superadmin...")
-    superadmin = Jugador(
-        name="Gero",
-        email=email,
-        password=hashed_password,
-        salt=salt,  # Guardamos el salt en la base de datos
-        nickhabbo="SuperGero",
-        role="superadmin",
-        is_active=True,
-        is_registered=True
-    )
+
 
     db.session.add(superadmin)
     db.session.commit()

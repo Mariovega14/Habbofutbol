@@ -64,7 +64,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${store.token}`,
-                        'X-API-KEY': API_KEY,
+                        
                     },
                     body: JSON.stringify({ nombre, modalidad, formato }),
                 });
@@ -106,7 +106,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         headers: {
                             "Content-Type": "application/json",
                             "Authorization": `Bearer ${token}`,
-                            'X-API-KEY': API_KEY,
+                            
                         },
                         body: JSON.stringify({ nickhabbo }),
                     });
@@ -176,7 +176,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         method: "GET",
                         headers: {
                             "Authorization": `Bearer ${token}`,
-                            'X-API-KEY': API_KEY, // Incluir el token
+                             // Incluir el token
                         }
                     });
 
@@ -198,7 +198,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         method: "GET",
                         headers: {
                             "Content-Type": "application/json",
-                            'X-API-KEY': API_KEY,
+                            
                         },
                     });
 
@@ -234,7 +234,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         headers: {
                             "Content-Type": "application/json",
                             "Authorization": `Bearer ${token}`,
-                            'X-API-KEY': API_KEY,
+                            
                         },
                         body: JSON.stringify({ nickhabbo: newNick }),
                     });
@@ -341,7 +341,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-API-KEY': API_KEY,
+                            
                         },
                     });
 
@@ -364,7 +364,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         method: "DELETE",
                         headers: {
                             "Content-Type": "application/json",
-                            'X-API-KEY': API_KEY,
+                            
                         },
                         body: JSON.stringify({ player_id: playerId, team_id: teamId })
                     });
@@ -429,7 +429,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`,
-                            'X-API-KEY': API_KEY, // 🔐 Envía el token en la petición
+                             // 🔐 Envía el token en la petición
                         },
                     });
 
@@ -460,7 +460,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         headers: {
                             "Content-Type": "application/json",
                             "Authorization": `Bearer ${token}`,
-                            'X-API-KEY': API_KEY,
+                            
                         }
                     });
 
@@ -487,7 +487,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         headers: {
                             "Content-Type": "application/json",
                             Authorization: `Bearer ${localStorage.getItem("token")}`,
-                            'X-API-KEY': API_KEY,
+                            
                         },
                         body: JSON.stringify(partidoData),
                     });
@@ -530,7 +530,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         headers: {
                             "Content-Type": "application/json",
                             "Authorization": `Bearer ${token}`,
-                            'X-API-KEY': API_KEY,
+                            
                         },
                         body: JSON.stringify(partidoData)  // 🔥 Asegurar que se envía como JSON
                     });
@@ -861,7 +861,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         headers: {
                             "Content-Type": "application/json",
                             "Authorization": `Bearer ${token}`,
-                            'X-API-KEY': API_KEY,
+                            
                         }
                     });
             
@@ -886,7 +886,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         headers: {
                             "Content-Type": "application/json",
                             "Authorization": `Bearer ${token}`,
-                            'X-API-KEY': API_KEY,
+                            
                         },
                         body: JSON.stringify({ id: playerId, role: newRole }) // ✅ El backend espera un objeto con "id" y "role"
                     });
