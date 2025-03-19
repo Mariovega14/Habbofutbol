@@ -38,7 +38,7 @@ const Noticias = () => {
     return (
         <div className="noticias-container">
             <h1 className="noticias-titulo">Noticias</h1>
-            {store.usuario && store.usuario.rol === "admin" && (
+            {store.usuario && (store.usuario.role === "admin" || store.usuario.role === "superadmin") && (
                 <div className="noticias-form">
                     <input type="text" name="titulo" placeholder="Título" value={nuevaNoticia.titulo} onChange={handleChange} />
                     <textarea name="contenido" placeholder="Contenido" value={nuevaNoticia.contenido} onChange={handleChange}></textarea>
@@ -62,7 +62,7 @@ const Noticias = () => {
                                 <h2>{noticia.titulo}</h2>
                                 <p>{noticia.contenido}</p>
                                 {noticia.imagen && <img src={noticia.imagen} alt={noticia.titulo} />}
-                                {store.usuario && store.usuario.rol === "admin" && (
+                                {store.usuario && store.usuario.role === "admin" && (
                                     <div className="noticia-buttons">
                                         <button onClick={() => handleEditarNoticia(noticia)}>Editar</button>
                                         <button onClick={() => handleEliminarNoticia(noticia.id)}>Eliminar</button>

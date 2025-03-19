@@ -1130,7 +1130,39 @@ def get_players_roles():
         return jsonify({"error": f"Error en el servidor: {str(e)}"}), 500
 
 
+
+@api.route('/noticias', methods=['POST'])
+@jwt_required()  
+def crear_noticia():
+    """Crear una nueva noticia"""
+    data = request.get_json()
+
+    if not data or not data.get("titulo") or not data.get("contenido"):
+        return jsonify({"error": "Título y contenido son obligatorios"}), 400
+
+    # Verificar si el usuario es admin o superadmin
+    claims = get_jwt()
+    if not any(role in claims.get("roles", []) for role in ["admin", "superadmin"]):
+        return jsonify({"error": "No tienes permiso para crear noticias"}), 403
+
+    nueva_noticia = Noticia(
+        titulo=data["titulo"],
+        contenido=data["contenido"],
+        imagen_url=data.get("imagen_url")  # Puede ser opcional
+    )
+
+    db.session.add(nueva_noticia)
+    db.session.commit()
+
+    return jsonify({"message": "Noticia creada exitosamente"}), 201
+
+
     
+@api.route('/noticias', methods=['GET'])
+def obtener_noticias():
+    """Obtener todas las noticias ordenadas por fecha (más recientes primero)"""
+    noticias = Noticia.query.order_by(Noticia.fecha_publicacion.desc()).all()
+
 
     lista_noticias = [
         {
@@ -1146,7 +1178,7 @@ def get_players_roles():
     return jsonify(lista_noticias), 200    
 
 @api.route('/noticias/<int:noticia_id>', methods=['PUT'])
-@jwt_required()  # Solo admins pueden editar
+@jwt_required()  
 def editar_noticia(noticia_id):
     """Editar una noticia existente"""
     data = request.get_json()
@@ -1155,9 +1187,9 @@ def editar_noticia(noticia_id):
     if not noticia:
         return jsonify({"error": "Noticia no encontrada"}), 404
 
-    # Verificar si el usuario es administrador (esto depende de tu sistema de roles)
+    # Verificar si el usuario es admin o superadmin
     claims = get_jwt()  # Obtener los claims del token JWT
-    if "admin" not in claims.get("roles", []):  # Verifica si tiene el rol admin
+    if not any(role in claims.get("roles", []) for role in ["admin", "superadmin"]):  
         return jsonify({"error": "No tienes permiso para editar noticias"}), 403
 
     noticia.titulo = data.get("titulo", noticia.titulo)
@@ -1168,8 +1200,9 @@ def editar_noticia(noticia_id):
 
     return jsonify({"message": "Noticia actualizada exitosamente"}), 200
 
+
 @api.route('/noticias/<int:noticia_id>', methods=['DELETE'])
-@jwt_required()  # Solo admins pueden borrar
+@jwt_required()  
 def eliminar_noticia(noticia_id):
     """Eliminar una noticia"""
     noticia = Noticia.query.get(noticia_id)
@@ -1177,12 +1210,13 @@ def eliminar_noticia(noticia_id):
     if not noticia:
         return jsonify({"error": "Noticia no encontrada"}), 404
 
-    # Verificar si el usuario es administrador
+    # Verificar si el usuario es admin o superadmin
     claims = get_jwt()
-    if "admin" not in claims.get("roles", []):
+    if not any(role in claims.get("roles", []) for role in ["admin", "superadmin"]):
         return jsonify({"error": "No tienes permiso para eliminar noticias"}), 403
 
     db.session.delete(noticia)
     db.session.commit()
 
     return jsonify({"message": "Noticia eliminada exitosamente"}), 200
+
