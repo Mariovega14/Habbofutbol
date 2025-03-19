@@ -349,18 +349,26 @@ const getState = ({ getStore, getActions, setStore }) => {
 
             eliminarEquipo: async (equipoId) => {
                 try {
+                    // 🔹 Obtener el token del usuario desde localStorage (o donde lo almacenes)
+                    const token = localStorage.getItem("token");
+            
+                    if (!token) {
+                        console.error("No tienes una sesión activa");
+                        return false;
+                    }
+            
                     const response = await fetch(`${process.env.BACKEND_URL}/equipos/${equipoId}`, {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json',
-
+                            'Authorization': `Bearer ${token}`  // ✅ Agregamos el token aquí
                         },
                     });
-
+            
                     if (!response.ok) {
                         throw new Error('Error al eliminar el equipo');
                     }
-
+            
                     return true;
                 } catch (error) {
                     console.error('Error:', error);
@@ -370,28 +378,38 @@ const getState = ({ getStore, getActions, setStore }) => {
 
             removePlayerFromTeam: async (playerId, teamId) => {
                 try {
-                    console.log("Intentando eliminar equipo:", { playerId, teamId }); // 🛠 Depuración
-
+                    console.log("Intentando eliminar jugador del equipo:", { playerId, teamId }); // 🛠 Depuración
+            
+                    // 🔹 Obtener el token del usuario desde localStorage (o donde lo almacenes)
+                    const token = localStorage.getItem("token");
+            
+                    if (!token) {
+                        console.error("No tienes una sesión activa");
+                        return { success: false, message: "No tienes una sesión activa" };
+                    }
+            
                     const response = await fetch(process.env.BACKEND_URL + "/remove_team", {
                         method: "DELETE",
                         headers: {
                             "Content-Type": "application/json",
-
+                            "Authorization": `Bearer ${token}`  // ✅ Se agrega el token JWT
                         },
                         body: JSON.stringify({ player_id: playerId, team_id: teamId })
                     });
-
-                    if (!response.ok) throw new Error("Error al eliminar el equipo.");
-
+            
+                    if (!response.ok) throw new Error("Error al eliminar el jugador del equipo.");
+            
                     const data = await response.json();
-                    console.log("Equipo eliminado:", data); // 🛠 Depuración
-
+                    console.log("Jugador eliminado:", data); // 🛠 Depuración
+            
                     getActions().getJugadores(); // Actualiza la lista de jugadores
-                    return data;
+                    return { success: true, data };
                 } catch (error) {
-                    console.error("Error al eliminar equipo:", error);
+                    console.error("Error al eliminar jugador del equipo:", error);
+                    return { success: false, message: "Error al eliminar el jugador del equipo." };
                 }
             },
+            
 
 
 
