@@ -904,6 +904,17 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
+            obtenerNoticias: async () => {
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/noticias`);
+                    if (!response.ok) throw new Error("Error al obtener noticias");
+                    const data = await response.json();
+                    setStore({ noticias: data });
+                } catch (error) {
+                    console.error("Error al obtener noticias:", error);
+                }
+            },
+
             crearNoticia: async (titulo, contenido, imagenUrl) => {
                 try {
                     const token = localStorage.getItem("token"); // 🔹 Obtiene el token almacenado
@@ -957,7 +968,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                 } catch (error) {
                     console.error("Error al eliminar noticia:", error);
                 }
-            }
+            },
 
 
 
