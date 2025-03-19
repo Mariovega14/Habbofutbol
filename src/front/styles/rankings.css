@@ -3,7 +3,7 @@
     max-width: 1200px;
     margin: 20px auto;
     padding: 20px;
-    height: 85vh; /* 🔥 Fija altura para hacer scroll solo aquí */
+    height: auto; /* 🔥 Fija altura para hacer scroll solo aquí */
     overflow-y: auto; /* ✅ Habilitar scroll sin tocar el body */
     display: flex;
     flex-direction: column;

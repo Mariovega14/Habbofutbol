@@ -30,7 +30,7 @@ class AdminModelView(ModelView):
 def setup_admin(app):
     app.secret_key = 'your_secret_key'
     app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
-<<<<<<< dev
+
 
     # Solo inicializa Flask-Admin si estamos en modo desarrollo
     if os.environ.get('FLASK_ENV') == 'development':  # Puedes controlar esto con la variable FLASK_ENV

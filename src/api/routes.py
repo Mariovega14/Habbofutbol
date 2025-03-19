@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, Jugador, Equipo, Torneo, Partido, EstadisticaJugador, Asistencia, JugadorEquipo, Oferta, Convocatoria
+from api.models import db, Jugador, Equipo, Torneo, Partido, EstadisticaJugador, Asistencia, JugadorEquipo, Oferta, Convocatoria, Noticia
 from api.utils import generate_sitemap, APIException, get_client_ip, is_valid_password
 from flask_cors import CORS
 import os
@@ -1132,3 +1132,57 @@ def get_players_roles():
 
     
 
+    lista_noticias = [
+        {
+            "id": n.id,
+            "titulo": n.titulo,
+            "contenido": n.contenido,
+            "imagen_url": n.imagen_url,
+            "fecha_publicacion": n.fecha_publicacion.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        for n in noticias
+    ]
+
+    return jsonify(lista_noticias), 200    
+
+@api.route('/noticias/<int:noticia_id>', methods=['PUT'])
+@jwt_required()  # Solo admins pueden editar
+def editar_noticia(noticia_id):
+    """Editar una noticia existente"""
+    data = request.get_json()
+    noticia = Noticia.query.get(noticia_id)
+
+    if not noticia:
+        return jsonify({"error": "Noticia no encontrada"}), 404
+
+    # Verificar si el usuario es administrador (esto depende de tu sistema de roles)
+    claims = get_jwt()  # Obtener los claims del token JWT
+    if "admin" not in claims.get("roles", []):  # Verifica si tiene el rol admin
+        return jsonify({"error": "No tienes permiso para editar noticias"}), 403
+
+    noticia.titulo = data.get("titulo", noticia.titulo)
+    noticia.contenido = data.get("contenido", noticia.contenido)
+    noticia.imagen_url = data.get("imagen_url", noticia.imagen_url)
+
+    db.session.commit()
+
+    return jsonify({"message": "Noticia actualizada exitosamente"}), 200
+
+@api.route('/noticias/<int:noticia_id>', methods=['DELETE'])
+@jwt_required()  # Solo admins pueden borrar
+def eliminar_noticia(noticia_id):
+    """Eliminar una noticia"""
+    noticia = Noticia.query.get(noticia_id)
+
+    if not noticia:
+        return jsonify({"error": "Noticia no encontrada"}), 404
+
+    # Verificar si el usuario es administrador
+    claims = get_jwt()
+    if "admin" not in claims.get("roles", []):
+        return jsonify({"error": "No tienes permiso para eliminar noticias"}), 403
+
+    db.session.delete(noticia)
+    db.session.commit()
+
+    return jsonify({"message": "Noticia eliminada exitosamente"}), 200

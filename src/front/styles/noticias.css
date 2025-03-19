@@ -1,0 +1,140 @@
+/* NOTICIAS CONTAINER */
+.noticias-container {
+    width: 100%;
+    max-width: 1700px;
+    height: 1600px;
+    overflow-y: auto;
+    background: linear-gradient(135deg, #0a0a0a, #1e1e1e);
+    border: 3px solid #ff007f;
+    border-radius: 15px;
+    box-shadow: 0 0 15px #ff007f;
+    padding: 20px;
+    margin: 20px auto;
+    position: relative;
+    transition: all 0.3s ease-in-out;
+}
+
+/* SCROLL PERSONALIZADO */
+.noticias-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.noticias-container::-webkit-scrollbar-thumb {
+    background: #ff007f;
+    border-radius: 5px;
+}
+
+.noticias-container::-webkit-scrollbar-track {
+    background: #222;
+}
+
+/* TITULO */
+.noticias-titulo {
+    text-align: center;
+    color: #ff007f;
+    text-shadow: 0 0 5px #ff007f, 0 0 10px #ff007f;
+    font-size: 36px;
+    font-weight: bold;
+}
+
+/* FORMULARIO DE CREACIÓN */
+.noticias-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(255, 0, 127, 0.1);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #ff007f;
+}
+
+.noticias-form input,
+.noticias-form textarea {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background: #222;
+    color: #fff;
+    font-size: 16px;
+}
+
+.noticias-form button {
+    padding: 10px;
+    background: #ff007f;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.noticias-form button:hover {
+    background: #ff3399;
+    box-shadow: 0 0 10px #ff007f;
+}
+
+/* LISTA DE NOTICIAS */
+.noticias-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* NOTICIA INDIVIDUAL */
+.noticia {
+    background: #111;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #ff007f;
+    transition: 0.3s;
+    position: relative;
+}
+
+.noticia:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 15px #ff3399;
+}
+
+.noticia h2 {
+    color: #ff007f;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.noticia p {
+    color: #ccc;
+    font-size: 16px;
+}
+
+.noticia img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+/* BOTONES DE ADMIN */
+.noticia-buttons {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.noticia-buttons button {
+    background: #ff007f;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+.noticia-buttons button:hover {
+    background: #ff3399;
+    box-shadow: 0 0 10px #ff007f;
+}

@@ -16,7 +16,9 @@ const getState = ({ getStore, getActions, setStore }) => {
             tablaMenciones: [],
             convocatorias: [],
             ofertas: [],
-            playersWithRoles: []
+            playersWithRoles: [],
+            ofertas: [],
+            noticias: []
         },
         actions: {
             register: async (playerData) => {
@@ -900,9 +902,58 @@ const getState = ({ getStore, getActions, setStore }) => {
                 } catch (error) {
                     console.error("❌ Error al actualizar rol:", error);
                 }
+            },
+
+            obtenerNoticias: async () => {
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/noticias`);
+                    if (!response.ok) throw new Error("Error al obtener noticias");
+                    const data = await response.json();
+                    setStore({ noticias: data });
+                } catch (error) {
+                    console.error("Error al obtener noticias:", error);
+                }
+            },
+
+            crearNoticia: async (titulo, contenido, imagenUrl) => {
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/noticias`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ titulo, contenido, imagenUrl })
+                    });
+                    if (!response.ok) throw new Error("Error al crear noticia");
+                    getActions().obtenerNoticias();
+                } catch (error) {
+                    console.error("Error al crear noticia:", error);
+                }
+            },
+
+            editarNoticia: async (id, titulo, contenido, imagenUrl) => {
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/noticias/${id}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ titulo, contenido, imagenUrl })
+                    });
+                    if (!response.ok) throw new Error("Error al editar noticia");
+                    getActions().obtenerNoticias();
+                } catch (error) {
+                    console.error("Error al editar noticia:", error);
+                }
+            },
+
+            eliminarNoticia: async (id) => {
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/noticias/${id}`, {
+                        method: "DELETE"
+                    });
+                    if (!response.ok) throw new Error("Error al eliminar noticia");
+                    getActions().obtenerNoticias();
+                } catch (error) {
+                    console.error("Error al eliminar noticia:", error);
+                }
             }
-
-
 
 
 
