@@ -401,10 +401,7 @@ def obtener_torneos():
 def crear_equipo():
     """Solo los Admins pueden crear equipos"""
     try:
-        # 🔍 Obtener el rol del usuario autenticado
-        jwt_data = get_jwt()
-        user_role = jwt_data.get("role")
-
+        
         # 🚫 Solo los admins pueden crear equipos
         if user_role != "admin":
             return jsonify({"error": "Acceso denegado"}), 403

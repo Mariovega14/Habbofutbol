@@ -292,19 +292,29 @@ const getState = ({ getStore, getActions, setStore }) => {
                     if (datos.logo) {
                         formData.append("logo", datos.logo);
                     }
-
+            
+                    const token = localStorage.getItem("token");
+            
+                    if (!token) {
+                        return { success: false, message: "No tienes una sesión activa" };
+                    }
+            
                     const resp = await fetch(`${process.env.BACKEND_URL}/equipos`, {
                         method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${token}`, 
+                        },
                         body: formData,
                     });
-
+            
                     const data = await resp.json();
                     return { success: resp.ok, message: data.message || data.error };
+            
                 } catch (error) {
                     return { success: false, message: "Error al conectar con el servidor" };
                 }
             },
-
+                
             getEquiposConLogo: async () => {
                 try {
                     const resp = await fetch(`${process.env.BACKEND_URL}/equipos-con-logo`);
