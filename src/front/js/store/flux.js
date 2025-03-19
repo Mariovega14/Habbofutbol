@@ -62,6 +62,12 @@ const getState = ({ getStore, getActions, setStore }) => {
             crearTorneo: async (nombre, modalidad, formato) => {
                 const store = getStore();
             
+                // 🚨 Validar que el usuario sea admin antes de hacer la solicitud
+                if (store.role !== "admin") {
+                    console.error("Acceso denegado: el usuario no es administrador");
+                    return { success: false, message: "No tienes permisos para crear un torneo" };
+                }
+            
                 try {
                     const response = await fetch(`${process.env.BACKEND_URL}/torneos`, {
                         method: "POST",
@@ -72,10 +78,10 @@ const getState = ({ getStore, getActions, setStore }) => {
                         body: JSON.stringify({ nombre, modalidad, formato }),
                     });
             
-                    const data = await response.json(); 
+                    const data = await response.json(); // Obtener respuesta en JSON
             
                     if (response.ok) {
-                        await getActions().getTorneos(); 
+                        await getActions().getTorneos(); // Refrescar la lista de torneos
                         return { success: true, message: "Torneo creado exitosamente" };
                     } else {
                         console.error("Error en crearTorneo:", data.error);
