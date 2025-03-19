@@ -19,7 +19,18 @@ api = Blueprint('api', __name__)
 # Allow CORS requests to this API
 CORS(api)
 
-
+@api.route('/sitemap', methods=['GET'])
+@jwt_required()  # Asegura que solo los usuarios autenticados pueden acceder
+def sitemap():
+    # Obtener el usuario actual
+    current_user = get_jwt_identity()
+    
+    # Verificar si el usuario es superadmin
+    if current_user.get('role') != 'superadmin':
+        return jsonify({"message": "Acceso denegado: se necesita el rol de superadmin"}), 403
+    
+    # Si es superadmin, generamos el sitemap
+    return generate_sitemap(app)
 
 
 @api.route('/register', methods=['POST'])
@@ -1119,7 +1130,5 @@ def get_players_roles():
         return jsonify({"error": f"Error en el servidor: {str(e)}"}), 500
 
 
-
-    
     
 

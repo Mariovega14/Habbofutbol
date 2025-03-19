@@ -25,7 +25,7 @@ app = Flask(__name__)
 app.url_map.strict_slashes = False
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+CORS(app, resources={r"/api/*": {"origins": ["https://habbofutbol.com", "https://www.habbofutbol.com"]}})
 
 # database condiguration
 db_url = os.getenv("DATABASE_URL")
@@ -53,7 +53,6 @@ app.register_blueprint(api, url_prefix='/api')
 
 # Handle/serialize errors like a JSON object
 
-
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
@@ -67,9 +66,30 @@ def handle_invalid_usage(error):
 
 @app.route('/')
 def sitemap():
-    if ENV == "development":
-        return generate_sitemap(app)
-    return send_from_directory(static_file_dir, 'index.html')
+    # Obtener el token de la cabecera de la solicitud
+    token = request.headers.get('Authorization')
+
+    if token:
+        try:
+            # Verificar el token (ajusta la clave secreta)
+            payload = jwt.decode(token, 'tu_clave_secreta', algorithms=["HS256"])
+
+            # Aquí podrías comprobar si el usuario tiene el rol de administrador, por ejemplo
+            if payload['role'] == 'admin':
+                # Si el token es válido y el rol es admin, permite el acceso
+                if ENV == "development":
+                    return generate_sitemap(app)
+                return send_from_directory(static_file_dir, 'index.html')
+
+            else:
+                return jsonify({"message": "Acceso denegado, rol no autorizado"}), 403
+
+        except jwt.ExpiredSignatureError:
+            return jsonify({"message": "Token expirado"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"message": "Token inválido"}), 401
+    else:
+        return jsonify({"message": "Token no proporcionado"}), 403
 
 # any other endpoint will try to serve it like a static file
 @app.route('/<path:path>', methods=['GET'])
