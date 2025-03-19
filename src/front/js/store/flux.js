@@ -431,7 +431,7 @@ const getState = ({ getStore, getActions, setStore }) => {
             addPlayerToTeam: async (jugadorId, equipoId) => {
                 try {
                     const token = localStorage.getItem("token"); // Obtener token JWT
-                    const response = await fetch(`${process.env.BACKEND_URL}/admin/players/add_team`, {
+                    const response = await fetch(`${process.env.BACKEND_URL}/players/add_team`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
