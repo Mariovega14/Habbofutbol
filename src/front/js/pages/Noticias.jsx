@@ -38,7 +38,7 @@ const Noticias = () => {
     return (
         <div className="noticias-container">
             <h1 className="noticias-titulo">Noticias</h1>
-            {store.jugador && (store.jugador.role === "admin" || store.jugador.role === "superadmin") && (
+            {store.role && (store.role === "admin" || store.role === "superadmin") && (
                 <div className="noticias-form">
                     <input type="text" name="titulo" placeholder="Título" value={nuevaNoticia.titulo} onChange={handleChange} />
                     <textarea name="contenido" placeholder="Contenido" value={nuevaNoticia.contenido} onChange={handleChange}></textarea>
