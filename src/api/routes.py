@@ -1132,21 +1132,15 @@ def get_players_roles():
 
 
 @api.route('/noticias', methods=['POST'])
-@jwt_required()  
+@jwt_required()
 def crear_noticia():
-    """Crear una nueva noticia"""
     data = request.get_json()
-
-    if not data or not data.get("titulo") or not data.get("contenido"):
-        return jsonify({"error": "Título y contenido son obligatorios"}), 400
-
+    print("Datos recibidos:", data)  # Verifica qué está llegando
     
-    nueva_noticia = Noticia(
-        titulo=data["titulo"],
-        contenido=data["contenido"],
-        imagen_url=data.get("imagen_url")  # Puede ser opcional
-    )
+    if not data or "titulo" not in data or "contenido" not in data:
+        return jsonify({"error": "Faltan datos"}), 400
 
+    nueva_noticia = Noticia(titulo=data["titulo"], contenido=data["contenido"], imagen_url=data.get("imagenUrl"))
     db.session.add(nueva_noticia)
     db.session.commit()
 

@@ -66,7 +66,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${store.token}`,
-                        
+
                     },
                     body: JSON.stringify({ nombre, modalidad, formato }),
                 });
@@ -108,7 +108,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         headers: {
                             "Content-Type": "application/json",
                             "Authorization": `Bearer ${token}`,
-                            
+
                         },
                         body: JSON.stringify({ nickhabbo }),
                     });
@@ -178,7 +178,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         method: "GET",
                         headers: {
                             "Authorization": `Bearer ${token}`,
-                             // Incluir el token
+                            // Incluir el token
                         }
                     });
 
@@ -200,7 +200,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         method: "GET",
                         headers: {
                             "Content-Type": "application/json",
-                            
+
                         },
                     });
 
@@ -236,7 +236,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         headers: {
                             "Content-Type": "application/json",
                             "Authorization": `Bearer ${token}`,
-                            
+
                         },
                         body: JSON.stringify({ nickhabbo: newNick }),
                     });
@@ -343,7 +343,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json',
-                            
+
                         },
                     });
 
@@ -366,7 +366,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         method: "DELETE",
                         headers: {
                             "Content-Type": "application/json",
-                            
+
                         },
                         body: JSON.stringify({ player_id: playerId, team_id: teamId })
                     });
@@ -431,7 +431,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`,
-                             // 🔐 Envía el token en la petición
+                            // 🔐 Envía el token en la petición
                         },
                     });
 
@@ -462,7 +462,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         headers: {
                             "Content-Type": "application/json",
                             "Authorization": `Bearer ${token}`,
-                            
+
                         }
                     });
 
@@ -489,7 +489,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         headers: {
                             "Content-Type": "application/json",
                             Authorization: `Bearer ${localStorage.getItem("token")}`,
-                            
+
                         },
                         body: JSON.stringify(partidoData),
                     });
@@ -532,7 +532,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         headers: {
                             "Content-Type": "application/json",
                             "Authorization": `Bearer ${token}`,
-                            
+
                         },
                         body: JSON.stringify(partidoData)  // 🔥 Asegurar que se envía como JSON
                     });
@@ -718,15 +718,15 @@ const getState = ({ getStore, getActions, setStore }) => {
                 try {
                     const response = await fetch(`${process.env.BACKEND_URL}/convocatorias/${modalidad}`);
                     const data = await response.json();
-            
+
                     if (!response.ok) throw new Error("Error al obtener convocatorias");
-            
+
                     setStore({ convocatorias: data }); // Guardamos las convocatorias en el store
                 } catch (error) {
                     alert("Hubo un problema al obtener las convocatorias. Inténtalo de nuevo más tarde.");
                 }
             },
-            
+
             crearConvocatoria: async (jugadorId, mensaje, modalidad) => {
                 try {
                     const response = await fetch(`${process.env.BACKEND_URL}/jugador/crear_convocatoria`, {
@@ -738,58 +738,58 @@ const getState = ({ getStore, getActions, setStore }) => {
                             modalidad
                         }),
                     });
-            
+
                     const data = await response.json();
-            
+
                     if (!response.ok) {
                         throw new Error(data.error || "Error al crear la convocatoria");
                     }
-            
+
                     alert("Convocatoria creada con éxito.");
                     getActions().getConvocatorias(modalidad); // Recargar convocatorias de la modalidad actual
                 } catch (error) {
                     alert(error.message); // Mostrar mensaje de error al usuario
                 }
             },
-            
+
             getOfertas: async (jugadorId, modalidad) => {
                 try {
                     if (!jugadorId || !modalidad) {
                         throw new Error("Datos incompletos. No se pueden obtener las ofertas.");
                     }
-            
+
                     const response = await fetch(`${process.env.BACKEND_URL}/jugador/${jugadorId}/ofertas/${modalidad}`);
                     const data = await response.json();
-            
+
                     if (!response.ok) {
                         throw new Error(data.error || "Error al obtener ofertas");
                     }
-            
+
                     setStore({ ofertas: data });
                 } catch (error) {
                     alert(error.message); // Mostrar mensaje de error al usuario
                     setStore({ ofertas: [] }); // Limpiar ofertas en caso de error
                 }
             },
-            
+
             enviarOferta: async (dtId, jugadorId, equipoId) => {
                 try {
                     if (!dtId || !jugadorId || !equipoId) {
                         throw new Error("Faltan datos obligatorios para enviar la oferta.");
                     }
-            
+
                     const response = await fetch(process.env.BACKEND_URL + "/dt/ofertar", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ dt_id: dtId, jugador_id: jugadorId, equipo_id: equipoId })
                     });
-            
+
                     const data = await response.json();
-            
+
                     if (data.error) {
                         throw new Error(data.error);
                     }
-            
+
                     alert("Oferta enviada con éxito.");
                     return data;
                 } catch (error) {
@@ -797,7 +797,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     return { error: error.message };
                 }
             },
-            
+
             aceptarOferta: async (ofertaId, jugadorId, modalidad) => {
                 try {
                     const response = await fetch(process.env.BACKEND_URL + "/jugador/aceptar_oferta", {
@@ -805,36 +805,36 @@ const getState = ({ getStore, getActions, setStore }) => {
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ oferta_id: ofertaId })
                     });
-            
+
                     const data = await response.json();
-            
+
                     if (!response.ok) {
                         throw new Error(data.error || "Error al aceptar la oferta");
                     }
-            
+
                     // Recargar ofertas y convocatorias después de aceptar la oferta
                     getActions().getOfertas(jugadorId, modalidad);
                     getActions().getConvocatorias(modalidad);
-            
+
                     return data;
                 } catch (error) {
                     alert(error.message); // Mostrar mensaje de error al usuario
                     return { success: false, message: error.message };
                 }
             },
-            
+
             getEquiposPorDT: async (dtId) => {
                 try {
                     const token = localStorage.getItem("token");
                     if (!token) {
                         throw new Error("No hay token disponible. Por favor, inicia sesión nuevamente.");
                     }
-            
+
                     const role = localStorage.getItem("role");
                     if (!role || role.toLowerCase() !== "dt") {
                         throw new Error("No tienes permisos para acceder a esta información.");
                     }
-            
+
                     const response = await fetch(`${process.env.BACKEND_URL}/equipos/dt/${dtId}`, {
                         method: "GET",
                         headers: {
@@ -842,11 +842,11 @@ const getState = ({ getStore, getActions, setStore }) => {
                             "Content-Type": "application/json"
                         }
                     });
-            
+
                     if (!response.ok) {
                         throw new Error(`Error al obtener los equipos: ${response.status}`);
                     }
-            
+
                     const data = await response.json();
                     return data;
                 } catch (error) {
@@ -863,17 +863,17 @@ const getState = ({ getStore, getActions, setStore }) => {
                         headers: {
                             "Content-Type": "application/json",
                             "Authorization": `Bearer ${token}`,
-                            
+
                         }
                     });
-            
+
                     if (!response.ok) throw new Error("Error al obtener los jugadores");
-            
+
                     const data = await response.json();
                     console.log("✅ Jugadores obtenidos:", data); // 👀 Ver qué llega
-            
+
                     setStore({ playersWithRoles: data });
-            
+
                 } catch (error) {
                     console.error("❌ Error al obtener jugadores con roles:", error);
                 }
@@ -888,16 +888,16 @@ const getState = ({ getStore, getActions, setStore }) => {
                         headers: {
                             "Content-Type": "application/json",
                             "Authorization": `Bearer ${token}`,
-                            
+
                         },
                         body: JSON.stringify({ id: playerId, role: newRole }) // ✅ El backend espera un objeto con "id" y "role"
                     });
-            
+
                     const result = await response.json();
                     if (!response.ok) throw new Error(result.error || "Error desconocido");
-            
+
                     console.log("✅ Rol actualizado:", result);
-            
+
                     getActions().getPlayersWithRoles(); // 🔄 Refrescar lista después de actualizar
                 } catch (error) {
                     console.error("❌ Error al actualizar rol:", error);
@@ -924,16 +924,20 @@ const getState = ({ getStore, getActions, setStore }) => {
                             "Content-Type": "application/json",
                             "Authorization": `Bearer ${token}`  // 🔹 Agrega el token aquí
                         },
-                        body: JSON.stringify({ titulo, contenido, imagenUrl })
+                        body: JSON.stringify({ 
+                            titulo: titulo, 
+                            contenido: contenido, 
+                            imagen: imagenUrl 
+                        })
                     });
                     if (!response.ok) throw new Error("Error al crear noticia");
-            
+
                     getActions().obtenerNoticias();
                 } catch (error) {
                     console.error("Error al crear noticia:", error);
                 }
             },
-            
+
             editarNoticia: async (id, titulo, contenido, imagenUrl) => {
                 try {
                     const token = localStorage.getItem("token"); // 🔹 Obtiene el token
@@ -946,13 +950,13 @@ const getState = ({ getStore, getActions, setStore }) => {
                         body: JSON.stringify({ titulo, contenido, imagenUrl })
                     });
                     if (!response.ok) throw new Error("Error al editar noticia");
-            
+
                     getActions().obtenerNoticias();
                 } catch (error) {
                     console.error("Error al editar noticia:", error);
                 }
             },
-            
+
             eliminarNoticia: async (id) => {
                 try {
                     const token = localStorage.getItem("token"); // 🔹 Obtiene el token
@@ -963,7 +967,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         }
                     });
                     if (!response.ok) throw new Error("Error al eliminar noticia");
-            
+
                     getActions().obtenerNoticias();
                 } catch (error) {
                     console.error("Error al eliminar noticia:", error);

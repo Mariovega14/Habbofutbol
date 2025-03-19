@@ -16,7 +16,7 @@ const Noticias = () => {
     };
 
     const handleCrearNoticia = () => {
-        actions.crearNoticia(nuevaNoticia);
+        actions.crearNoticia(nuevaNoticia.titulo, nuevaNoticia.contenido, nuevaNoticia.imagen);
         setNuevaNoticia({ titulo: "", contenido: "", imagen: "" });
     };
 
@@ -24,10 +24,6 @@ const Noticias = () => {
         actions.eliminarNoticia(id);
     };
 
-    const handleEditarNoticia = (noticia) => {
-        setEditando(noticia.id);
-        setNuevaNoticia({ titulo: noticia.titulo, contenido: noticia.contenido, imagen: noticia.imagen });
-    };
 
     const handleGuardarEdicion = (id) => {
         actions.editarNoticia(id, nuevaNoticia);
@@ -37,8 +33,9 @@ const Noticias = () => {
 
     return (
         <div className="noticias-container">
-            <h1 className="noticias-titulo">Noticias</h1>
-            {store.role && (store.role === "admin" || store.role === "superadmin") && (
+            <h1 className="noticias-titulo">Últimas Noticias</h1>
+
+            {store?.role && (store.role === "admin" || store.role === "superadmin") && (
                 <div className="noticias-form">
                     <input type="text" name="titulo" placeholder="Título" value={nuevaNoticia.titulo} onChange={handleChange} />
                     <textarea name="contenido" placeholder="Contenido" value={nuevaNoticia.contenido} onChange={handleChange}></textarea>
@@ -46,32 +43,35 @@ const Noticias = () => {
                     <button onClick={handleCrearNoticia}>Crear Noticia</button>
                 </div>
             )}
-            {/* ESTA ES LA CORRECCIÓN: el contenedor general de noticias debe tener noticias-lista */}
+
             <div className="noticias-lista">
-                {store.noticias.map((noticia) => (
-                    <div key={noticia.id} className="noticia">
-                        {editando === noticia.id ? (
-                            <div>
-                                <input type="text" name="titulo" value={nuevaNoticia.titulo} onChange={handleChange} />
-                                <textarea name="contenido" value={nuevaNoticia.contenido} onChange={handleChange}></textarea>
-                                <input type="text" name="imagen" value={nuevaNoticia.imagen} onChange={handleChange} />
-                                <button onClick={() => handleGuardarEdicion(noticia.id)}>Guardar</button>
-                            </div>
-                        ) : (
-                            <div>
-                                <h2>{noticia.titulo}</h2>
-                                <p>{noticia.contenido}</p>
-                                {noticia.imagen && <img src={noticia.imagen} alt={noticia.titulo} />}
-                                {store.usuario && store.usuario.role === "admin" && (
-                                    <div className="noticia-buttons">
-                                        <button onClick={() => handleEditarNoticia(noticia)}>Editar</button>
-                                        <button onClick={() => handleEliminarNoticia(noticia.id)}>Eliminar</button>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                ))}
+                {store?.noticias && store.noticias.length > 0 ? (
+                    store.noticias.map((noticia) => (
+                        <div key={noticia.id} className="noticia">
+                            {editando === noticia.id ? (
+                                <div className="noticia-editar">
+                                    <input type="text" name="titulo" value={nuevaNoticia.titulo} onChange={handleChange} />
+                                    <textarea name="contenido" value={nuevaNoticia.contenido} onChange={handleChange}></textarea>
+                                    <input type="text" name="imagen" value={nuevaNoticia.imagen} onChange={handleChange} />
+                                    <button onClick={() => handleGuardarEdicion(noticia.id)}>Guardar</button>
+                                </div>
+                            ) : (
+                                <div className="noticia-card">
+                                    <h2>{noticia.titulo}</h2>
+                                    <div className="noticia-contenido" dangerouslySetInnerHTML={{ __html: noticia.contenido.replace(/\n/g, "<br>") }}></div>
+                                    {noticia.imagen && <img src={noticia.imagen} alt={noticia.titulo} className="noticia-imagen" />}
+                                    {store.role === "admin" && (
+                                        <div className="noticia-buttons">
+                                            <button onClick={() => handleEliminarNoticia(noticia.id)}>Eliminar</button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    ))
+                ) : (
+                    <p className="noticias-mensaje">No hay noticias disponibles.</p>
+                )}
             </div>
         </div>
     );
