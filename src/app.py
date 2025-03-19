@@ -25,7 +25,9 @@ app = Flask(__name__)
 app.url_map.strict_slashes = False
 
 app = Flask(__name__)
+
 CORS(app, resources={r"/api/*": {"origins": ["https://habbofutbol.com", "https://www.habbofutbol.com"]}})
+
 
 # database condiguration
 db_url = os.getenv("DATABASE_URL")
@@ -60,7 +62,20 @@ def handle_invalid_usage(error):
 # generate sitemap with all your endpoints
 
   # Cargar variables de entorno
+API_KEY = os.getenv("API_KEY")
 
+@app.before_request
+def check_api_key():
+    """Verifica que la petición venga del frontend y tenga la API_KEY"""
+    allowed_origin = ["https://habbofutbol.com", "http://localhost:3000"]
+    origin = request.headers.get("Origin")
+    key = request.headers.get("X-API-KEY")
+
+    if origin and origin not in allowed_origin:
+        return jsonify({"error": "Acceso no permitido"}), 403
+    
+    if key != API_KEY:
+        return jsonify({"error": "API Key inválida"}), 403
 
 
 
@@ -121,17 +136,7 @@ def crear_superadmin():
     # Hashear la contraseña con el salt concatenado
     hashed_password = generate_password_hash(f"{password}{salt}")
 
-    print("🆕 Creando superadmin...")
-    superadmin = Jugador(
-        name="Gero",
-        email=email,
-        password=hashed_password,
-        salt=salt,  # Guardamos el salt en la base de datos
-        nickhabbo="SuperGero",
-        role="superadmin",
-        is_active=True,
-        is_registered=True
-    )
+
 
     db.session.add(superadmin)
     db.session.commit()
