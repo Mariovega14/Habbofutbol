@@ -61,21 +61,29 @@ const getState = ({ getStore, getActions, setStore }) => {
 
             crearTorneo: async (nombre, modalidad, formato) => {
                 const store = getStore();
-                const response = await fetch(`${process.env.BACKEND_URL}/torneos`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${store.token}`,
-
-                    },
-                    body: JSON.stringify({ nombre, modalidad, formato }),
-                });
-
-                if (response.ok) {
-                    await getActions().getTorneos(); // Refrescar la lista de torneos
-                    return true;
-                } else {
-                    return false;
+            
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/torneos`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${store.token}`,
+                        },
+                        body: JSON.stringify({ nombre, modalidad, formato }),
+                    });
+            
+                    const data = await response.json(); 
+            
+                    if (response.ok) {
+                        await getActions().getTorneos(); 
+                        return { success: true, message: "Torneo creado exitosamente" };
+                    } else {
+                        console.error("Error en crearTorneo:", data.error);
+                        return { success: false, message: data.error || "Error desconocido" };
+                    }
+                } catch (error) {
+                    console.error("Error en la petición:", error);
+                    return { success: false, message: "Error en la conexión con el servidor" };
                 }
             },
 
