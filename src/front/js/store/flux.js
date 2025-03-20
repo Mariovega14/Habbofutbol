@@ -957,26 +957,34 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
-            crearNoticia: async (titulo, contenido, imagenUrl) => {
+            crearNoticia: async (titulo, contenido, imagen) => {
                 try {
-                    const token = localStorage.getItem("token"); // 🔹 Obtiene el token almacenado
+                    let formData = new FormData();
+                    formData.append("titulo", titulo);
+                    formData.append("contenido", contenido);
+                    if (imagen) {
+                        formData.append("imagen", imagen);
+                    }
+            
+                    const token = localStorage.getItem("token");
+            
+                    if (!token) {
+                        return { success: false, message: "No tienes una sesión activa" };
+                    }
+            
                     const response = await fetch(`${process.env.BACKEND_URL}/noticias`, {
                         method: "POST",
                         headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${token}`  // 🔹 Agrega el token aquí
+                            "Authorization": `Bearer ${token}`, 
                         },
-                        body: JSON.stringify({ 
-                            titulo: titulo, 
-                            contenido: contenido, 
-                            imagen: imagenUrl 
-                        })
+                        body: formData,
                     });
-                    if (!response.ok) throw new Error("Error al crear noticia");
-
-                    getActions().obtenerNoticias();
+            
+                    const data = await response.json();
+                    return { success: response.ok, message: data.message || data.error, imagen_url: data.imagen_url };
+                    
                 } catch (error) {
-                    console.error("Error al crear noticia:", error);
+                    return { success: false, message: "Error al conectar con el servidor" };
                 }
             },
 

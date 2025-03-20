@@ -1131,17 +1131,34 @@ def get_players_roles():
 @api.route('/noticias', methods=['POST'])
 @jwt_required()
 def crear_noticia():
-    data = request.get_json()
-    print("Datos recibidos:", data)  # Verifica qué está llegando
-    
-    if not data or "titulo" not in data or "contenido" not in data:
-        return jsonify({"error": "Faltan datos"}), 400
+    """Crear una nueva noticia con imagen opcional."""
+    try:
+        # 📌 Obtener datos de la petición
+        titulo = request.form.get("titulo")
+        contenido = request.form.get("contenido")
 
-    nueva_noticia = Noticia(titulo=data["titulo"], contenido=data["contenido"], imagen_url=data.get("imagenUrl"))
-    db.session.add(nueva_noticia)
-    db.session.commit()
+        if not titulo or not contenido:
+            return jsonify({"error": "Faltan datos"}), 400
 
-    return jsonify({"message": "Noticia creada exitosamente"}), 201
+        # 📌 Procesar imagen si existe
+        imagen = request.files.get("imagen")
+        imagen_url = None
+        if imagen:
+            try:
+                result = upload(imagen)  # Sube la imagen a Cloudinary
+                imagen_url = result["secure_url"]
+            except Exception as e:
+                return jsonify({"error": f"Error al subir la imagen: {str(e)}"}), 500
+
+        # 📰 Guardar noticia en la base de datos
+        nueva_noticia = Noticia(titulo=titulo, contenido=contenido, imagen_url=imagen_url)
+        db.session.add(nueva_noticia)
+        db.session.commit()
+
+        return jsonify({"message": "Noticia creada exitosamente", "imagen_url": imagen_url}), 201
+
+    except Exception as e:
+        return jsonify({"error": f"Error en el servidor: {str(e)}"}), 500
 
 
     

@@ -133,19 +133,15 @@
 }
 
 /* IMAGEN DE NOTICIA */
-.noticia img {
-    width: 100%;
-    max-height: 400px;
-    object-fit: cover;
-    border-radius: 10px;
-    margin-top: 15px;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-    transition: transform 0.3s ease-in-out;
+.noticia-imagen {
+    width: 100%;  /* Se expande al ancho del contenedor */
+    max-height: 300px;  /* Altura máxima para evitar imágenes gigantes */
+    object-fit: contain;  /* Ajusta la imagen sin recortar ni distorsionar */
+    border-radius: 8px;  /* Bordes redondeados para estética */
+    display: block;
+    margin: 10px auto;  /* Centrar la imagen */
 }
 
-.noticia img:hover {
-    transform: scale(1.05);
-}
 
 /* BOTONES DE ADMIN */
 .noticia-buttons {
