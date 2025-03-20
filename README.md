@@ -78,7 +78,8 @@ Configura la base de datos en Railway y las variables de entorno para EC2 AWS y 
 Despliega el backend en EC2 AWS: sigue las instrucciones de configuración de AWS.
 Despliega el frontend en Vercel: sigue las instrucciones de configuración de Vercel.
 Uso
-Accede a la aplicación a través de tu navegador con habbofutbol.com
+Accede a la aplicación a través de tu navegador con
+https://www.habbofutbol.com
 
 Utiliza las funcionalidades de gestión de torneos, equipos, jugadores y partidos según sea necesario.
 
