@@ -1,0 +1,194 @@
+/* CONTENEDOR PRINCIPAL */
+.noticias-container {
+    width: 90%;
+    max-width: 1600px;
+    background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    padding: 30px;
+    margin: 20px auto;
+    position: relative;
+    text-align: center;
+}
+
+/* SCROLL PERSONALIZADO */
+.noticias-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.noticias-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 215, 0, 0.6);
+    border-radius: 5px;
+}
+
+.noticias-container::-webkit-scrollbar-track {
+    background: #333;
+}
+
+/* TÍTULO PRINCIPAL */
+.noticias-titulo {
+    text-align: center;
+    color: #ffd700;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+    font-size: 40px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-bottom: 3px solid rgba(255, 215, 0, 0.5);
+    padding-bottom: 10px;
+}
+
+/* FORMULARIO DE CREACIÓN */
+.noticias-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: rgba(255, 215, 0, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.noticias-form input,
+.noticias-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    border-radius: 5px;
+    background: #1c1c1c;
+    color: #fff;
+    font-size: 18px;
+    text-align: center;
+}
+
+.noticias-form input:focus,
+.noticias-form textarea:focus {
+    outline: none;
+    border-color: #f1c40f;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+}
+
+.noticias-form button {
+    padding: 12px;
+    background: linear-gradient(135deg, #ffd700, #f1c40f);
+    color: #222;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.noticias-form button:hover {
+    background: #f1c40f;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+    transform: scale(1.05);
+}
+
+/* LISTA DE NOTICIAS */
+.noticias-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    margin-top: 30px;
+}
+
+/* NOTICIA INDIVIDUAL */
+.noticia {
+    background: linear-gradient(145deg, #222, #333);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    border: 2px solid rgba(255, 215, 0, 0.6);
+    text-align: center;
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+.noticia:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+}
+
+/* TITULO DE NOTICIA */
+.noticia h2 {
+    color: #ffd700;
+    font-size: 26px;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+    font-weight: bold;
+    margin-bottom: 15px;
+    border-bottom: 2px solid rgba(255, 215, 0, 0.4);
+    padding-bottom: 10px;
+}
+
+/* TEXTO DE NOTICIA */
+.noticia p {
+    color: #ddd;
+    font-size: 20px;
+    line-height: 1.8;
+    text-align: justify;
+    padding: 0 15px;
+}
+
+/* IMAGEN DE NOTICIA */
+.noticia-imagen {
+    width: 100%;  /* Se expande al ancho del contenedor */
+    max-height: 300px;  /* Altura máxima para evitar imágenes gigantes */
+    object-fit: contain;  /* Ajusta la imagen sin recortar ni distorsionar */
+    border-radius: 8px;  /* Bordes redondeados para estética */
+    display: block;
+    margin: 10px auto;  /* Centrar la imagen */
+}
+
+
+/* BOTONES DE ADMIN */
+.noticia-buttons {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.noticia-buttons button {
+    background: linear-gradient(135deg, #ffd700, #f1c40f);
+    color: #222;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.noticia-buttons button:hover {
+    background: #f1c40f;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+    transform: scale(1.1);
+}
+
+/* ANIMACIÓN DE APARICIÓN */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.noticia-contenido {
+    white-space: pre-wrap;
+    font-size: 18px;
+    line-height: 1.6;
+    text-align: left; /* O "center" si lo quieres centrado */
+    color: #ddd;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}

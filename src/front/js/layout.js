@@ -25,6 +25,7 @@ import ResumenesPartidos from "./component/Resumenes.jsx";
 
 import { Navbar } from "./component/navbar";
 import OfertarJugador from "./component/OfertarJugador.jsx";
+import Noticias from "./pages/Noticias.jsx"
 
 
 
@@ -57,6 +58,7 @@ const Layout = () => {
                         <Route element={<AicDashboard />} path="/aic" />
                         <Route element={<HFADashboard />} path="/hfa" />
                         <Route element={<OhbDashboard />} path="/ohb" />
+                        <Route element={<Noticias />} path="/noticias" />
                         <Route element={<ResumenesPartidos />} path="/:modalidad/resumenes" />
                         <Route element={<Rankings />} path="/:modalidad/rankings" />
                         <Route element={<EquiposModalidad />} path="/:modalidad/equipos" />

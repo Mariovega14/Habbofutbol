@@ -37,8 +37,8 @@ export const Navbar = () => {
   return (
     <nav className="navbar">
       <a href="/">
-  <img src={logohf} alt="Habbofutbol" className="navbar-logo" />
-</a>
+        <img src={logohf} alt="Habbofutbol" className="navbar-logo" />
+      </a>
       <button className="menu-btn" ref={buttonRef} onClick={toggleMenu}>
         ⋮
       </button>
@@ -47,14 +47,11 @@ export const Navbar = () => {
         <div className="dropdown-menu" ref={menuRef}>
           {store.token ? (
             <>
-              {store.role === "admin" && (
+              {(store.role === "admin" || store.role === "superadmin") && (
                 <div className="menu-item" onClick={() => navigate("/admin")}>
                   <Shield size={18} /> <span>Administración</span>
                 </div>
               )}
-              <div className="menu-item" onClick={() => navigate("/perfil")}>
-                <User size={18} /> <span>Perfil</span>
-              </div>
               <div className="menu-item" onClick={() => navigate("/noticias")}>
                 <Newspaper size={18} /> <span>Noticias</span>
               </div>

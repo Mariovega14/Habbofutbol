@@ -1,16 +1,16 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Context } from "../store/appContext";
+import "../../styles/roles.css";
 
-const PlayersWithRoles = () => {
+const CustomPlayersWithRoles = () => {
     const { store, actions } = useContext(Context);
-    const [roles, setRoles] = useState({}); // Estado local para almacenar los roles seleccionados
+    const [roles, setRoles] = useState({});
 
     useEffect(() => {
-        actions.getPlayersWithRoles(); // Cargar jugadores al montar
+        actions.getPlayersWithRoles();
     }, []);
 
     useEffect(() => {
-        // Inicializa los valores de los roles cuando llegan los datos
         if (store.playersWithRoles.length > 0) {
             const initialRoles = store.playersWithRoles.reduce((acc, player) => {
                 acc[player.id] = player.role;
@@ -27,9 +27,9 @@ const PlayersWithRoles = () => {
     };
 
     return (
-        <div className="container mt-4">
-            <h2 className="mb-3">Lista de Jugadores y Roles</h2>
-            <table className="table table-striped">
+        <div className="custom-players-container">
+            <h2 className="custom-players-title">Gestión de Roles</h2>
+            <table className="custom-players-table">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -46,7 +46,7 @@ const PlayersWithRoles = () => {
                                 <td>{player.nickhabbo}</td>
                                 <td>
                                     <select
-                                        className="form-select"
+                                        className="custom-role-select"
                                         value={roles[player.id] || player.role}
                                         onChange={(e) => handleRoleChange(player.id, e.target.value)}
                                     >
@@ -59,7 +59,7 @@ const PlayersWithRoles = () => {
                                 </td>
                                 <td>
                                     <button
-                                        className="btn btn-primary"
+                                        className="custom-save-button"
                                         onClick={() => actions.updatePlayerRole(player.id, roles[player.id])}
                                     >
                                         Guardar
@@ -69,7 +69,7 @@ const PlayersWithRoles = () => {
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="4" className="text-center">No hay jugadores disponibles</td>
+                            <td colSpan="4" className="custom-no-players">No hay jugadores disponibles</td>
                         </tr>
                     )}
                 </tbody>
@@ -78,4 +78,4 @@ const PlayersWithRoles = () => {
     );
 };
 
-export default PlayersWithRoles;
+export default CustomPlayersWithRoles;
