@@ -25,7 +25,9 @@ app = Flask(__name__)
 app.url_map.strict_slashes = False
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+CORS(app, resources={r"/api/*": {"origins": ["https://habbofutbol.com", "https://www.habbofutbol.com"]}})
+
 
 # database condiguration
 db_url = os.getenv("DATABASE_URL")
@@ -53,7 +55,6 @@ app.register_blueprint(api, url_prefix='/api')
 
 # Handle/serialize errors like a JSON object
 
-
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
@@ -61,15 +62,49 @@ def handle_invalid_usage(error):
 # generate sitemap with all your endpoints
 
   # Cargar variables de entorno
+API_KEY = os.getenv("API_KEY")
 
+@app.before_request
+def check_api_key():
+    """Verifica que la petición venga del frontend y tenga la API_KEY"""
+    allowed_origin = ["https://habbofutbol.com", "http://localhost:3000"]
+    origin = request.headers.get("Origin")
+    key = request.headers.get("X-API-KEY")
+
+    if origin and origin not in allowed_origin:
+        return jsonify({"error": "Acceso no permitido"}), 403
+    
+    if key != API_KEY:
+        return jsonify({"error": "API Key inválida"}), 403
 
 
 
 @app.route('/')
 def sitemap():
-    if ENV == "development":
-        return generate_sitemap(app)
-    return send_from_directory(static_file_dir, 'index.html')
+    # Obtener el token de la cabecera de la solicitud
+    token = request.headers.get('Authorization')
+
+    if token:
+        try:
+            # Verificar el token (ajusta la clave secreta)
+            payload = jwt.decode(token, 'tu_clave_secreta', algorithms=["HS256"])
+
+            # Aquí podrías comprobar si el usuario tiene el rol de administrador, por ejemplo
+            if payload['role'] == 'admin':
+                # Si el token es válido y el rol es admin, permite el acceso
+                if ENV == "development":
+                    return generate_sitemap(app)
+                return send_from_directory(static_file_dir, 'index.html')
+
+            else:
+                return jsonify({"message": "Acceso denegado, rol no autorizado"}), 403
+
+        except jwt.ExpiredSignatureError:
+            return jsonify({"message": "Token expirado"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"message": "Token inválido"}), 401
+    else:
+        return jsonify({"message": "Token no proporcionado"}), 403
 
 # any other endpoint will try to serve it like a static file
 @app.route('/<path:path>', methods=['GET'])
@@ -101,23 +136,14 @@ def crear_superadmin():
     # Hashear la contraseña con el salt concatenado
     hashed_password = generate_password_hash(f"{password}{salt}")
 
-    print("🆕 Creando superadmin...")
-    superadmin = Jugador(
-        name="Gero",
-        email=email,
-        password=hashed_password,
-        salt=salt,  # Guardamos el salt en la base de datos
-        nickhabbo="SuperAdmin",
-        role="superadmin",
-        is_active=True,
-        is_registered=True
-    )
+
 
     db.session.add(superadmin)
     db.session.commit()
     print("✅ Superadmin creado con éxito")
 
 with app.app_context():
+    db.create_all()  # Asegura que las tablas existen antes de crear el superadmin
     crear_superadmin()
 
 
