@@ -1,81 +1,89 @@
-# WebApp boilerplate with React JS and Flask API
+Habbofutbol - Plataforma de Gestión de Torneos de Fútbol
 
-Build web applications using React.js for the front end and python/flask for your backend API.
+Descripción General
 
-- Documentation can be found here: https://start.4geeksacademy.com/starters/react-flask
-- Here is a video on [how to use this template](https://www.loom.com/share/f37c6838b3f1496c95111e515e83dd9b)
-- Integrated with Pipenv for package managing.
-- Fast deployment to heroku [in just a few steps here](https://start.4geeksacademy.com/backend/deploy-heroku-posgres).
-- Use of .env file.
-- SQLAlchemy integration for database abstraction.
+Habbofutbol es una plataforma web Full Stack diseñada para gestionar de manera integral torneos de fútbol. Permite la creación y gestión de torneos, equipos y jugadores, así como la gestión del mercado de jugadores, la generación de reportes de partidos por árbitros, la visualización de rankings y tablas de goleadores, y la gestión de roles. El sistema está construido con un backend robusto en Python y Flask, y un frontend dinámico y responsivo en React.js.
 
-### 1) Installation:
+Funcionalidades Principales
 
-> If you use Github Codespaces (recommended) or Gitpod this template will already come with Python, Node and the Posgres Database installed. If you are working locally make sure to install Python 3.10, Node 
+Gestión de Torneos:
 
-It is recomended to install the backend first, make sure you have Python 3.8, Pipenv and a database engine (Posgress recomended)
+Creación de nuevos torneos con detalles como nombre, fechas y reglas.
+Gestión de equipos participantes en cada torneo.
 
-1. Install the python packages: `$ pipenv install`
-2. Create a .env file based on the .env.example: `$ cp .env.example .env`
-3. Install your database engine and create your database, depending on your database you have to create a DATABASE_URL variable with one of the possible values, make sure you replace the valudes with your database information:
+Gestión de Equipos y Jugadores:
+Creación y edición de equipos con información detallada.
+Gestión de jugadores con detalles como nombre, posición y estadísticas.
+Gestion del mercado de jugadores.
 
-| Engine    | DATABASE_URL                                        |
-| --------- | --------------------------------------------------- |
-| SQLite    | sqlite:////test.db                                  |
-| MySQL     | mysql://username:password@localhost:port/example    |
-| Postgress | postgres://username:password@localhost:5432/example |
+Gestión de Partidos y Reportes:
+Generación de reportes de partidos por árbitros.
+Visualización de resultados y estadísticas de partidos.
 
-4. Migrate the migrations: `$ pipenv run migrate` (skip if you have not made changes to the models on the `./src/api/models.py`)
-5. Run the migrations: `$ pipenv run upgrade`
-6. Run the application: `$ pipenv run start`
+Rankings y Tablas:
+Visualización de rankings de equipos y tablas de goleadores, asistencias, etc.
 
-> Note: Codespaces users can connect to psql by typing: `psql -h localhost -U gitpod example`
+Gestión de Roles:
+Gestion de roles de usuarios como arbitros, directores tecnicos, administradores etc.
 
-### Undo a migration
+Gestión de Imágenes:
+Uso de Cloudinary para la gestión eficiente de las imágenes de jugadores y equipos.
 
-You are also able to undo a migration by running
+Autenticación y Autorización:
+Implementación de JWT para la seguridad de la aplicación.
 
-```sh
-$ pipenv run downgrade
-```
+Gestión de estados:
+Implementación de redux para la gestión de estados de la app en react.
 
-### Backend Populate Table Users
+Tecnologías Utilizadas
 
-To insert test users in the database execute the following command:
+Backend:
 
-```sh
-$ flask insert-test-users 5
-```
+Python
 
-And you will see the following message:
+Flask
 
-```
-  Creating test users
-  test_user1@test.com created.
-  test_user2@test.com created.
-  test_user3@test.com created.
-  test_user4@test.com created.
-  test_user5@test.com created.
-  Users created successfully!
-```
+SQLAlchemy
 
-### **Important note for the database and the data inside it**
+JWT
 
-Every Github codespace environment will have **its own database**, so if you're working with more people eveyone will have a different database and different records inside it. This data **will be lost**, so don't spend too much time manually creating records for testing, instead, you can automate adding records to your database by editing ```commands.py``` file inside ```/src/api``` folder. Edit line 32 function ```insert_test_data``` to insert the data according to your model (use the function ```insert_test_users``` above as an example). Then, all you need to do is run ```pipenv run insert-test-data```.
+Frontend:
 
-### Front-End Manual Installation:
+React.js
 
--   Make sure you are using node version 14+ and that you have already successfully installed and runned the backend.
+HTML5
 
-1. Install the packages: `$ npm install`
-2. Start coding! start the webpack dev server `$ npm run start`
+CSS3
 
-## Publish your website!
+Bootstrap
 
-This boilerplate it's 100% read to deploy with Render.com and Heroku in a matter of minutes. Please read the [official documentation about it](https://start.4geeksacademy.com/deploy).
+Otros:
 
-### Contributors
+Cloudinary
 
-This template was built as part of the 4Geeks Academy [Coding Bootcamp](https://4geeksacademy.com/us/coding-bootcamp) by [Alejandro Sanchez](https://twitter.com/alesanchezr) and many other contributors. Find out more about our [Full Stack Developer Course](https://4geeksacademy.com/us/coding-bootcamps/part-time-full-stack-developer), and [Data Science Bootcamp](https://4geeksacademy.com/us/coding-bootcamps/datascience-machine-learning).
+Redux
 
-You can find other templates and resources like this at the [school github page](https://github.com/4geeksacademy/).
+Railway (base de datos)
+
+EC2 AWS (backend)
+
+Vercel (frontend)
+
+Instalación
+
+Clona el repositorio: git clone https://github.com/dserodio?tab=repositories
+Instala las dependencias del backend: pip install -r requirements.txt
+Instala las dependencias del frontend: npm install
+Configura la base de datos en Railway y las variables de entorno para EC2 AWS y Vercel.
+Despliega el backend en EC2 AWS: sigue las instrucciones de configuración de AWS.
+Despliega el frontend en Vercel: sigue las instrucciones de configuración de Vercel.
+Uso
+Accede a la aplicación a través de tu navegador con habbofutbol.com
+
+Utiliza las funcionalidades de gestión de torneos, equipos, jugadores y partidos según sea necesario.
+
+Para la gestión de las imagenes de los jugadores y equipos dirijase a cloudinary para la configuracion.
+
+Contribución
+
+¡Las contribuciones son bienvenidas! Si encuentras un error o tienes una sugerencia de mejora, por favor, abre un issue o envía un pull request.
