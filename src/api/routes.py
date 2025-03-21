@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, Jugador, Equipo, Torneo, Partido, EstadisticaJugador, Asistencia, JugadorEquipo, Oferta, Convocatoria
+from api.models import db, Jugador, Equipo, Torneo, Partido, EstadisticaJugador, Asistencia, JugadorEquipo, Oferta, Convocatoria, Noticia
 from api.utils import generate_sitemap, APIException, get_client_ip, is_valid_password
 from flask_cors import CORS
 import os
@@ -145,7 +145,7 @@ def get_jugadores_por_equipo(equipo_id):
 
 
     
-@api.route('/admin/players/add_team', methods=['POST'])
+@api.route('/players/add_team', methods=['POST'])
 @jwt_required()
 def add_player_to_team():
     """Añadir un jugador a un equipo con la modalidad del torneo, evitando duplicados"""
@@ -173,7 +173,6 @@ def add_player_to_team():
     db.session.commit()
 
     return jsonify({"message": "Jugador añadido correctamente"}), 201
-
 
 
 
@@ -1130,5 +1129,91 @@ def get_players_roles():
         return jsonify({"error": f"Error en el servidor: {str(e)}"}), 500
 
 
+@api.route('/noticias', methods=['POST'])
+@jwt_required()
+def crear_noticia():
+    """Crear una nueva noticia con imagen opcional."""
+    try:
+        # 📌 Obtener datos de la petición
+        titulo = request.form.get("titulo")
+        contenido = request.form.get("contenido")
+
+        if not titulo or not contenido:
+            return jsonify({"error": "Faltan datos"}), 400
+
+        # 📌 Procesar imagen si existe
+        imagen = request.files.get("imagen")
+        imagen_url = None
+        if imagen:
+            try:
+                result = upload(imagen)  # Sube la imagen a Cloudinary
+                imagen_url = result["secure_url"]
+            except Exception as e:
+                return jsonify({"error": f"Error al subir la imagen: {str(e)}"}), 500
+
+        # 📰 Guardar noticia en la base de datos
+        nueva_noticia = Noticia(titulo=titulo, contenido=contenido, imagen_url=imagen_url)
+        db.session.add(nueva_noticia)
+        db.session.commit()
+
+        return jsonify({"message": "Noticia creada exitosamente", "imagen_url": imagen_url}), 201
+
+    except Exception as e:
+        return jsonify({"error": f"Error en el servidor: {str(e)}"}), 500
+
+
+    
+@api.route('/noticias', methods=['GET'])
+def obtener_noticias():
+    """Obtener todas las noticias ordenadas por fecha (más recientes primero)"""
+    noticias = Noticia.query.order_by(Noticia.fecha_publicacion.desc()).all()
+
+
+    lista_noticias = [
+        {
+            "id": n.id,
+            "titulo": n.titulo,
+            "contenido": n.contenido,
+            "imagen_url": n.imagen_url,
+            "fecha_publicacion": n.fecha_publicacion.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        for n in noticias
+    ]
+
+    return jsonify(lista_noticias), 200    
+
+@api.route('/noticias/<int:noticia_id>', methods=['PUT'])
+@jwt_required()  
+def editar_noticia(noticia_id):
+    """Editar una noticia existente"""
+    data = request.get_json()
+    noticia = Noticia.query.get(noticia_id)
+
+    if not noticia:
+        return jsonify({"error": "Noticia no encontrada"}), 404
+
+
+    noticia.titulo = data.get("titulo", noticia.titulo)
+    noticia.contenido = data.get("contenido", noticia.contenido)
+    noticia.imagen_url = data.get("imagen_url", noticia.imagen_url)
+
+    db.session.commit()
+
+    return jsonify({"message": "Noticia actualizada exitosamente"}), 200
+
+
+@api.route('/noticias/<int:noticia_id>', methods=['DELETE'])
+@jwt_required()  
+def eliminar_noticia(noticia_id):
+    """Eliminar una noticia"""
+    noticia = Noticia.query.get(noticia_id)
+
+    if not noticia:
+        return jsonify({"error": "Noticia no encontrada"}), 404
+
     
 
+    db.session.delete(noticia)
+    db.session.commit()
+
+    return jsonify({"message": "Noticia eliminada exitosamente"}), 200

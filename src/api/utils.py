@@ -24,8 +24,8 @@ def has_no_empty_params(rule):
 
 
 def is_valid_password(password):
-    """Verifica que la contraseña tenga al menos una letra y un número."""
-    return bool(re.search(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$', password))
+    """Verifica que la contraseña tenga al menos una letra, un número y permita caracteres especiales."""
+    return bool(re.search(r'^(?=.*[A-Za-z])(?=.*\d).{6,}$', password))
 
 def generate_sitemap(app):
     links = ['/admin/']
