@@ -137,7 +137,7 @@ const Equipos = () => {
                     <td>{torneo ? torneo.nombre : "Desconocido"}</td>
                     <td>{torneo ? torneo.modalidad : "Desconocido"}</td>
                     <td>
-                      <button className="btn-eliminar" onClick={() => confirmarEliminacion(equipo)}>
+                      <button className="btn-eliminar-equipo" onClick={() => confirmarEliminacion(equipo)}>
                         Eliminar
                       </button>
                     </td>

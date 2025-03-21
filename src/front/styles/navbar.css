@@ -76,3 +76,31 @@
   height: auto; /* Mantiene la proporción */
 }
 
+.noticias-boton {
+  background-color: #FFD700; /* Color dorado */
+  color: black;
+  padding: 10px 15px;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0px 0px 8px rgba(255, 215, 0, 0.8);
+  animation: pulse 1.5s infinite;
+}
+
+/* Animación de "pulso" */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.noticias-boton:hover {
+  background-color: #FFA500; 
+  transform: scale(1.1);
+}

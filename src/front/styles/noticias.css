@@ -1,0 +1,278 @@
+.noticias-wrapper {
+    padding: 60px 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #f0f4f8;
+  }
+  
+  .noticias-container {
+    max-width: 95%;
+    margin: 0 auto;
+    background-color: #1f2937;
+    border-radius: 18px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    padding: 50px;
+    position: relative;
+    border: 1px solid #374151;
+  }
+  
+  .noticias-titulo {
+    font-size: 2.8rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 35px;
+    color: #60a5fa;
+  }
+  
+  .btn-crear-noticia {
+    display: block;
+    margin: 0 auto 30px auto;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .btn-crear-noticia:hover {
+    background-color: #2563eb;
+  }
+  
+  .noticias-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    text-align: center;
+  }
+  
+  .noticia-preview-card {
+    background-color: #374151;
+    border: 1px solid #475569;
+    padding: 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    position: relative;
+  }
+  
+  .noticia-preview-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .noticia-preview-card h4 {
+    margin: 0;
+    font-size: 18px;
+    color: #f9fafb;
+  }
+  
+  .btn-eliminar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  
+  .btn-eliminar:hover {
+    background: #b91c1c;
+  }
+  
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* =======================
+     📄 Modal Visualizar Noticia (Oscuro)
+     ======================= */
+     .modal-carta.ver {
+        background: linear-gradient(145deg, #1f2937, #111827);
+        border-radius: 18px;
+        padding: 35px;
+        width: 120%;
+        max-width: 1250px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+        position: relative;
+        max-height: 90vh;
+        overflow-y: auto;
+        color: #f1f5f9;
+        border: 1px solid #334155;
+        font-family: 'Georgia', serif;
+      }
+      
+      .modal-carta.ver h3 {
+        font-size: 26px;
+        font-weight: bold;
+        margin-top: 0;
+        color: #60a5fa;
+        border-bottom: 2px solid #334155;
+        padding-bottom: 10px;
+      }
+      
+      .modal-carta.ver .noticia-contenido {
+        margin-top: 20px;
+        font-size: 18px;
+        line-height: 1.75;
+        color: #e5e7eb;
+        white-space: pre-wrap;
+        padding-left: 5px;
+        font-family: 'Times New Roman', Times, serif;
+        
+      }
+      
+      .modal-carta.ver img {
+        margin-top: 30px;
+        width: 100%;
+        border-radius: 16px;
+        border: 2px solid #475569;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+        object-fit: cover;
+      }
+      
+      .modal-carta.ver .modal-cerrar {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 30px;
+        color: #cbd5e1;
+        cursor: pointer;
+        transition: color 0.2s ease;
+      }
+      
+      .modal-carta.ver .modal-cerrar:hover {
+        color: #f87171;
+      }
+      
+      /* Scroll interno elegante */
+      .modal-carta.ver::-webkit-scrollbar {
+        width: 10px;
+      }
+      .modal-carta.ver::-webkit-scrollbar-thumb {
+        background-color: #475569;
+        border-radius: 5px;
+      }
+  
+      @keyframes cartaAparece {
+        0% {
+          transform: scale(0.9) rotateX(-30deg);
+          opacity: 0;
+        }
+        60% {
+          transform: scale(1.02) rotateX(5deg);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1) rotateX(0deg);
+        }
+      }
+      
+      
+  /* =======================
+     ✍️ Modal Crear Noticia (Claro)
+     ======================= */
+  .modal-carta.crear {
+    background-color: #ffffff;
+    color: #1e293b;
+    border-radius: 14px;
+    padding: 30px;
+    width: 95%;
+    max-width: 750px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    position: relative;
+  }
+  
+  .modal-carta.crear h3 {
+    margin-top: 0;
+    color: #1e3a8a;
+    font-size: 22px;
+  }
+  
+  .modal-carta.crear input[type="text"],
+  .modal-carta.crear input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    margin-bottom: 15px;
+    font-size: 15px;
+    background-color: #f8fafc;
+    color: #111827;
+  }
+  
+  .modal-carta.crear button {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  .modal-carta.crear button:hover {
+    background-color: #1e40af;
+  }
+  
+  /* 🎨 Editor solo en crear */
+  .modal-carta.crear .ql-toolbar {
+    background: #f1f5f9 !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+  
+  .modal-carta.crear .ql-container {
+    background: white !important;
+    color: black !important;
+    border: 1px solid #cbd5e1 !important;
+    border-top: none;
+    overflow-y: auto;
+    max-height: 800px;
+  }
+  
+  .modal-carta.crear .ql-editor {
+    color: #1e293b !important;
+    font-size: 15px;
+    padding: 15px;
+    background-color: #ffffff !important;
+  }
+  
+  /* ❌ Cerrar */
+  .modal-cerrar {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    cursor: pointer;
+    color: #94a3b8;
+  }
+  
+  /* Responsive */
+  @media (max-width: 600px) {
+    .noticias-container {
+      padding: 20px;
+    }
+  
+    .modal-carta {
+      padding: 20px;
+    }
+  
+    .btn-crear-noticia {
+      width: 100%;
+    }
+  }

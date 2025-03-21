@@ -15,6 +15,8 @@ from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash
 from base64 import b64encode
+from extensions import limiter
+from flask_limiter.errors import RateLimitExceeded
 
 load_dotenv()
 
@@ -25,7 +27,18 @@ app = Flask(__name__)
 app.url_map.strict_slashes = False
 
 app = Flask(__name__)
+
 CORS(app, resources={r"/api/*": {"origins": ["https://habbofutbol.com", "https://www.habbofutbol.com"]}})
+
+
+limiter.init_app(app)
+
+@app.errorhandler(RateLimitExceeded)
+def ratelimit_error(e):
+    return jsonify({
+        "error": "rate_limit",
+        "message": "Demasiadas solicitudes. Espera un momento antes de volver a intentarlo."
+    }), 429
 
 # database condiguration
 db_url = os.getenv("DATABASE_URL")
@@ -57,7 +70,8 @@ app.register_blueprint(api, url_prefix='/api')
 def handle_invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
 
-# generate sitemap with all your endpoints
+# generate sitemap with all your e
+
 
   # Cargar variables de entorno
 
@@ -90,6 +104,16 @@ def sitemap():
             return jsonify({"message": "Token inválido"}), 401
     else:
         return jsonify({"message": "Token no proporcionado"}), 403
+
+
+@app.route('/')
+def sitemap():
+    if ENV == "development":
+        return generate_sitemap(app)
+    return send_from_directory(static_file_dir, 'index.html')
+
+
+
 
 # any other endpoint will try to serve it like a static file
 @app.route('/<path:path>', methods=['GET'])

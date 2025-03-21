@@ -33,7 +33,7 @@ const Resumenes = () => {
         return acc;
     }, {});
 
-    const partidosFiltrados = partidos.filter(partido => 
+    const partidosFiltrados = partidos.filter(partido =>
         partido.modalidad?.trim().toUpperCase() === modalidad?.trim().toUpperCase()
     );
 
@@ -51,6 +51,7 @@ const Resumenes = () => {
                             <h4 className="resumen-equipos">
                                 {equiposMap[partido.equipo_a_id] || "Desconocido"} 🆚 {equiposMap[partido.equipo_b_id] || "Desconocido"}
                             </h4>
+                            <p className="resumen-fecha">📅 {partido.fecha}</p>
                             <p className="resumen-resultado">{partido.goles_equipo_a} - {partido.goles_equipo_b}</p>
                         </div>
                     ))

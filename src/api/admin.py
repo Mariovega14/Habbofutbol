@@ -24,3 +24,9 @@ def setup_admin(app):
         def block_admin_access():
             if '/admin' in request.path:
                 return jsonify({"message": "Acceso a /admin deshabilitado en producción"}), 403
+
+
+
+
+
+
