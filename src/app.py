@@ -106,12 +106,6 @@ def sitemap():
         return jsonify({"message": "Token no proporcionado"}), 403
 
 
-@app.route('/')
-def sitemap():
-    if ENV == "development":
-        return generate_sitemap(app)
-    return send_from_directory(static_file_dir, 'index.html')
-
 
 
 
