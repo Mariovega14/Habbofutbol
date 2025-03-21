@@ -24,8 +24,9 @@ def has_no_empty_params(rule):
 
 
 def is_valid_password(password):
-    """Verifica que la contraseña tenga al menos una letra, un número y permita caracteres especiales."""
-    return bool(re.search(r'^(?=.*[A-Za-z])(?=.*\d).{6,}$', password))
+   
+    pattern = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;"\'<>,.?/~`\\|=\-]).{8,}$'
+    return bool(re.match(pattern, password))
 
 def generate_sitemap(app):
     links = ['/admin/']
@@ -47,11 +48,12 @@ def generate_sitemap(app):
         <p>Remember to specify a real endpoint path like: </p>
         <ul style="text-align: left;">"""+links_html+"</ul></div>"
 
-def get_client_ip():
-    """Obtiene la IP real del usuario desde los headers."""
-    ip = request.headers.get("X-Forwarded-For")  # Priorizar la IP del proxy
+
+def get_client_ip(req=None):
+    """Obtiene la IP real del usuario desde los headers, considerando posibles proxys."""
+    req = req or request
+    ip = req.headers.get("X-Forwarded-For")
     if ip:
-        return ip.split(",")[0]  # Tomar la primera IP (la del usuario real)
-    
-    return request.environ.get("REMOTE_ADDR", "Desconocida")
+        return ip.split(",")[0].strip()
+    return req.environ.get("REMOTE_ADDR", "Desconocida")
 

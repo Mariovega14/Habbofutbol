@@ -3,7 +3,7 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, Jugador, Equipo, Torneo, Partido, EstadisticaJugador, Asistencia, JugadorEquipo, Oferta, Convocatoria, Noticia
-from api.utils import generate_sitemap, APIException, get_client_ip, is_valid_password
+from api.utils import generate_sitemap, APIException, get_client_ip, is_valid_password 
 from flask_cors import CORS
 import os
 from base64 import b64encode
@@ -11,8 +11,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request, get_jwt
 import cloudinary.uploader
 from cloudinary.uploader import upload
-from datetime import datetime
-
+from datetime import datetime, timedelta
+from extensions import limiter
 
 api = Blueprint('api', __name__)
 
@@ -66,7 +66,7 @@ def add_new_player():
         return jsonify({"error": f"Error en el servidor: {err.args}"}), 500
 
 
-@api.route('/jugadores/admin', methods=['POST'])
+@api.route('/jugadores/noregistrados', methods=['POST'])
 @jwt_required()
 def crear_jugador_admin():
     """Permite al administrador registrar un jugador con un NickHabbo"""
@@ -297,7 +297,10 @@ def login():
         return jsonify({"error": str(err)}), 500
     
 
+
+# Endpoint protegido
 @api.route('/asistencia', methods=['POST'])
+@limiter.limit("3 per minute")  # Solo permite 3 intentos por IP por minuto
 def registrar_asistencia():
     data = request.get_json()
     nombre = data.get("nombre", "").strip()
@@ -305,13 +308,20 @@ def registrar_asistencia():
     if not nombre:
         return jsonify({"message": "El nombre es obligatorio"}), 400
 
-    ip = request.headers.get("X-Forwarded-For", request.remote_addr)  # Captura la IP del usuario
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+
+    # Bloquear si ya registró con el mismo nombre en el último minuto
+    hace_un_minuto = datetime.utcnow() - timedelta(minutes=1)
+    repetido = Asistencia.query.filter_by(nombre=nombre).filter(Asistencia.fecha_hora >= hace_un_minuto).first()
+    if repetido:
+        return jsonify({"message": "Ya registraste asistencia recientemente"}), 429
 
     nueva_asistencia = Asistencia(nombre=nombre, ip=ip)
     db.session.add(nueva_asistencia)
     db.session.commit()
 
     return jsonify({"message": "Asistencia registrada correctamente"}), 201
+
 
     
 
@@ -639,7 +649,7 @@ def obtener_equipos_por_torneo(torneo_id):
 @api.route('/partidos', methods=['GET'])
 def obtener_partidos():
     try:
-        partidos = Partido.query.all()
+        partidos = Partido.query.order_by(Partido.fecha.desc()).all()
         partidos_json = []
 
         for partido in partidos:
@@ -682,12 +692,12 @@ def obtener_partidos():
                 "observaciones": partido.observaciones,
                 "modalidad": partido.torneo.modalidad if partido.torneo else None,
                 "link_video": partido.link_video,
-                "estadisticas": estadisticas_json  # ✅ Ahora incluye el equipo_id correcto
+                "estadisticas": estadisticas_json  
             })
 
         return jsonify(partidos_json), 200
     except Exception as e:
-        print(f"⚠️ Error en obtener_partidos: {str(e)}")  # 🔍 DEPURAR ERROR
+        print(f"⚠️ Error en obtener_partidos: {str(e)}") 
         return jsonify({"error": "Error al obtener los partidos", "detalle": str(e)}), 500
 
 
@@ -698,7 +708,7 @@ def obtener_partidos():
 
     
 
-@api.route('/admin/players/<int:jugador_id>/remove-team/<int:equipo_id>', methods=['PUT'])
+@api.route('/players/<int:jugador_id>/remove-team/<int:equipo_id>', methods=['PUT'])
 @jwt_required()
 def remove_team_from_player(jugador_id, equipo_id):
     """Permite al administrador quitar a un jugador de un equipo específico"""
