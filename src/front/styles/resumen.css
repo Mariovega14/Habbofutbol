@@ -202,3 +202,9 @@
         flex-direction: column;
     }
 }
+
+.resumen-fecha {
+    font-size: 14px;
+    color: #aaa;
+    margin: 4px 0;
+}

@@ -169,3 +169,19 @@ class Oferta(db.Model):
     dt = db.relationship("Jugador", foreign_keys=[dt_id])
     jugador = db.relationship("Jugador", foreign_keys=[jugador_id])
     equipo = db.relationship("Equipo", backref="ofertas")    
+
+class Noticia(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String(255), nullable=False)
+    contenido = db.Column(db.Text, nullable=False)
+    imagen_url = db.Column(db.String(500), nullable=True)  # Guardar la URL de la imagen
+    fecha_publicacion = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "titulo": self.titulo,
+            "contenido": self.contenido,
+            "imagen_url": self.imagen_url,
+            "fecha_publicacion": self.fecha_publicacion.strftime('%Y-%m-%d %H:%M:%S')
+        }    
