@@ -17,7 +17,6 @@ from extensions import limiter
 api = Blueprint('api', __name__)
 
 # Allow CORS requests to this API
-CORS(api)
 
 @api.route('/sitemap', methods=['GET'])
 @jwt_required()  # Asegura que solo los usuarios autenticados pueden acceder

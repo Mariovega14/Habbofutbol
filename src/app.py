@@ -31,6 +31,7 @@ app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": ["https://habbofutbol.com", "https://www.habbofutbol.com"]}})
 
 
+
 limiter.init_app(app)
 
 @app.errorhandler(RateLimitExceeded)
@@ -104,14 +105,6 @@ def sitemap():
             return jsonify({"message": "Token inválido"}), 401
     else:
         return jsonify({"message": "Token no proporcionado"}), 403
-
-
-@app.route('/')
-def sitemap():
-    if ENV == "development":
-        return generate_sitemap(app)
-    return send_from_directory(static_file_dir, 'index.html')
-
 
 
 
