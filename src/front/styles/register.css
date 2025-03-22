@@ -2,7 +2,7 @@
 body {
     background: url('https://res.cloudinary.com/dxsey90nb/image/upload/v1741900125/r0wjyh9p3jr3mvf77htv.png') 
                 no-repeat center top 60px / cover;
-    overflow: hidden; /* Oculta el scroll */
+                overflow-x: hidden;
     height: 100%;
 }
 
@@ -79,4 +79,11 @@ body {
 .register-container .login-text span:hover {
     text-decoration: underline;
     color: #ffcc00;
+}
+
+.password-warning {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: -10px;
+    margin-bottom: 10px;
 }
