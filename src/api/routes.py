@@ -41,7 +41,9 @@ def add_new_player():
         return jsonify({"error": "Todos los datos tienen que estar completos"}), 400
 
     if not is_valid_password(body["password"]):
-        return jsonify({"error": "La contraseña debe contener al menos una letra, un número y ser de 6 caracteres o más"}), 400
+        return jsonify({
+            "error": "La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número."
+        }), 400
 
     email, name, password, nickhabbo = [body[field] for field in required_fields]
 
