@@ -107,7 +107,7 @@
 }
 
 /* Botón eliminar */
-.btn-eliminar {
+.btn-eliminar-equipo {
     background: #dc3545;
     color: white;
     border: none;
@@ -116,7 +116,7 @@
     border-radius: 5px;
 }
 
-.btn-eliminar:hover {
+.btn-eliminar-equipo:hover {
     background: #c82333;
 }
 

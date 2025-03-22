@@ -2,8 +2,8 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, Jugador, Equipo, Torneo, Partido, EstadisticaJugador, Asistencia, JugadorEquipo, Oferta, Convocatoria
-from api.utils import generate_sitemap, APIException, get_client_ip, is_valid_password
+from api.models import db, Jugador, Equipo, Torneo, Partido, EstadisticaJugador, Asistencia, JugadorEquipo, Oferta, Convocatoria, Noticia
+from api.utils import generate_sitemap, APIException, get_client_ip, is_valid_password 
 from flask_cors import CORS
 import os
 from base64 import b64encode
@@ -11,15 +11,25 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request, get_jwt
 import cloudinary.uploader
 from cloudinary.uploader import upload
-from datetime import datetime
-
+from datetime import datetime, timedelta
+from extensions import limiter
 
 api = Blueprint('api', __name__)
 
 # Allow CORS requests to this API
-CORS(api)
 
-
+@api.route('/sitemap', methods=['GET'])
+@jwt_required()  # Asegura que solo los usuarios autenticados pueden acceder
+def sitemap():
+    # Obtener el usuario actual
+    current_user = get_jwt_identity()
+    
+    # Verificar si el usuario es superadmin
+    if current_user.get('role') != 'superadmin':
+        return jsonify({"message": "Acceso denegado: se necesita el rol de superadmin"}), 403
+    
+    # Si es superadmin, generamos el sitemap
+    return generate_sitemap(app)
 
 
 @api.route('/register', methods=['POST'])
@@ -55,7 +65,7 @@ def add_new_player():
         return jsonify({"error": f"Error en el servidor: {err.args}"}), 500
 
 
-@api.route('/jugadores/admin', methods=['POST'])
+@api.route('/jugadores/noregistrados', methods=['POST'])
 @jwt_required()
 def crear_jugador_admin():
     """Permite al administrador registrar un jugador con un NickHabbo"""
@@ -134,7 +144,7 @@ def get_jugadores_por_equipo(equipo_id):
 
 
     
-@api.route('/admin/players/add_team', methods=['POST'])
+@api.route('/players/add_team', methods=['POST'])
 @jwt_required()
 def add_player_to_team():
     """Añadir un jugador a un equipo con la modalidad del torneo, evitando duplicados"""
@@ -162,7 +172,6 @@ def add_player_to_team():
     db.session.commit()
 
     return jsonify({"message": "Jugador añadido correctamente"}), 201
-
 
 
 
@@ -287,7 +296,10 @@ def login():
         return jsonify({"error": str(err)}), 500
     
 
+
+# Endpoint protegido
 @api.route('/asistencia', methods=['POST'])
+@limiter.limit("3 per minute")  # Solo permite 3 intentos por IP por minuto
 def registrar_asistencia():
     data = request.get_json()
     nombre = data.get("nombre", "").strip()
@@ -295,13 +307,20 @@ def registrar_asistencia():
     if not nombre:
         return jsonify({"message": "El nombre es obligatorio"}), 400
 
-    ip = request.headers.get("X-Forwarded-For", request.remote_addr)  # Captura la IP del usuario
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+
+    # Bloquear si ya registró con el mismo nombre en el último minuto
+    hace_un_minuto = datetime.utcnow() - timedelta(minutes=1)
+    repetido = Asistencia.query.filter_by(nombre=nombre).filter(Asistencia.fecha_hora >= hace_un_minuto).first()
+    if repetido:
+        return jsonify({"message": "Ya registraste asistencia recientemente"}), 429
 
     nueva_asistencia = Asistencia(nombre=nombre, ip=ip)
     db.session.add(nueva_asistencia)
     db.session.commit()
 
     return jsonify({"message": "Asistencia registrada correctamente"}), 201
+
 
     
 
@@ -629,7 +648,7 @@ def obtener_equipos_por_torneo(torneo_id):
 @api.route('/partidos', methods=['GET'])
 def obtener_partidos():
     try:
-        partidos = Partido.query.all()
+        partidos = Partido.query.order_by(Partido.fecha.desc()).all()
         partidos_json = []
 
         for partido in partidos:
@@ -672,12 +691,12 @@ def obtener_partidos():
                 "observaciones": partido.observaciones,
                 "modalidad": partido.torneo.modalidad if partido.torneo else None,
                 "link_video": partido.link_video,
-                "estadisticas": estadisticas_json  # ✅ Ahora incluye el equipo_id correcto
+                "estadisticas": estadisticas_json  
             })
 
         return jsonify(partidos_json), 200
     except Exception as e:
-        print(f"⚠️ Error en obtener_partidos: {str(e)}")  # 🔍 DEPURAR ERROR
+        print(f"⚠️ Error en obtener_partidos: {str(e)}") 
         return jsonify({"error": "Error al obtener los partidos", "detalle": str(e)}), 500
 
 
@@ -688,7 +707,7 @@ def obtener_partidos():
 
     
 
-@api.route('/admin/players/<int:jugador_id>/remove-team/<int:equipo_id>', methods=['PUT'])
+@api.route('/players/<int:jugador_id>/remove-team/<int:equipo_id>', methods=['PUT'])
 @jwt_required()
 def remove_team_from_player(jugador_id, equipo_id):
     """Permite al administrador quitar a un jugador de un equipo específico"""
@@ -1119,7 +1138,91 @@ def get_players_roles():
         return jsonify({"error": f"Error en el servidor: {str(e)}"}), 500
 
 
+@api.route('/noticias', methods=['POST'])
+@jwt_required()
+def crear_noticia():
+    """Crear una nueva noticia con imagen opcional."""
+    try:
+        # 📌 Obtener datos de la petición
+        titulo = request.form.get("titulo")
+        contenido = request.form.get("contenido")
+
+        if not titulo or not contenido:
+            return jsonify({"error": "Faltan datos"}), 400
+
+        # 📌 Procesar imagen si existe
+        imagen = request.files.get("imagen")
+        imagen_url = None
+        if imagen:
+            try:
+                result = upload(imagen)  # Sube la imagen a Cloudinary
+                imagen_url = result["secure_url"]
+            except Exception as e:
+                return jsonify({"error": f"Error al subir la imagen: {str(e)}"}), 500
+
+        # 📰 Guardar noticia en la base de datos
+        nueva_noticia = Noticia(titulo=titulo, contenido=contenido, imagen_url=imagen_url)
+        db.session.add(nueva_noticia)
+        db.session.commit()
+
+        return jsonify({"message": "Noticia creada exitosamente", "imagen_url": imagen_url}), 201
+
+    except Exception as e:
+        return jsonify({"error": f"Error en el servidor: {str(e)}"}), 500
+
 
     
+@api.route('/noticias', methods=['GET'])
+def obtener_noticias():
+    """Obtener todas las noticias ordenadas por fecha (más recientes primero)"""
+    noticias = Noticia.query.order_by(Noticia.fecha_publicacion.desc()).all()
+
+
+    lista_noticias = [
+        {
+            "id": n.id,
+            "titulo": n.titulo,
+            "contenido": n.contenido,
+            "imagen_url": n.imagen_url,
+            "fecha_publicacion": n.fecha_publicacion.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        for n in noticias
+    ]
+
+    return jsonify(lista_noticias), 200    
+
+@api.route('/noticias/<int:noticia_id>', methods=['PUT'])
+@jwt_required()  
+def editar_noticia(noticia_id):
+    """Editar una noticia existente"""
+    data = request.get_json()
+    noticia = Noticia.query.get(noticia_id)
+
+    if not noticia:
+        return jsonify({"error": "Noticia no encontrada"}), 404
+
+
+    noticia.titulo = data.get("titulo", noticia.titulo)
+    noticia.contenido = data.get("contenido", noticia.contenido)
+    noticia.imagen_url = data.get("imagen_url", noticia.imagen_url)
+
+    db.session.commit()
+
+    return jsonify({"message": "Noticia actualizada exitosamente"}), 200
+
+
+@api.route('/noticias/<int:noticia_id>', methods=['DELETE'])
+@jwt_required()  
+def eliminar_noticia(noticia_id):
+    """Eliminar una noticia"""
+    noticia = Noticia.query.get(noticia_id)
+
+    if not noticia:
+        return jsonify({"error": "Noticia no encontrada"}), 404
+
     
 
+    db.session.delete(noticia)
+    db.session.commit()
+
+    return jsonify({"message": "Noticia eliminada exitosamente"}), 200
