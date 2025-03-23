@@ -1,8 +1,12 @@
 /* Estilos exclusivos para la página de registro */
 body {
     background: url('https://res.cloudinary.com/dxsey90nb/image/upload/v1741900125/r0wjyh9p3jr3mvf77htv.png') 
-                repeat center top 60px / cover;
+                no-repeat center top fixed;
                 overflow-x: hidden;
+                background-attachment: fixed;
+    height: 100%;
+    margin: 0;
+    padding: 0;
     height: 100%;
 }
 

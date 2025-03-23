@@ -1041,6 +1041,18 @@ def aceptar_oferta():
         db.session.rollback()
         return jsonify({"error": "Error interno del servidor"}), 500
 
+@api.route("/jugador/eliminar_convocatoria/<int:convocatoria_id>", methods=["DELETE"])
+def eliminar_convocatoria(convocatoria_id):
+    convocatoria = Convocatoria.query.get(convocatoria_id)
+
+    if not convocatoria:
+        return jsonify({"error": "Convocatoria no encontrada"}), 404
+
+    db.session.delete(convocatoria)
+    db.session.commit()
+
+    return jsonify({"mensaje": "Convocatoria eliminada con éxito"}), 200        
+
 
 @api.route("/equipos/dt/<int:dt_id>", methods=["GET"])
 @jwt_required()  # Asegura que el DT esté autenticado

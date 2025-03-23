@@ -887,6 +887,26 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
+            eliminarConvocatoria: async (convocatoriaId, modalidad) => {
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/jugador/eliminar_convocatoria/${convocatoriaId}`, {
+                        method: "DELETE"
+                    });
+            
+                    const data = await response.json();
+            
+                    if (!response.ok) {
+                        throw new Error(data.error || "Error al eliminar la convocatoria");
+                    }
+            
+                    alert("Convocatoria eliminada con éxito.");
+                    getActions().getConvocatorias(modalidad); // Recargar después de eliminar
+                } catch (error) {
+                    alert(error.message); // Mostrar mensaje de error
+                }
+            },
+            
+
             getEquiposPorDT: async (dtId) => {
                 try {
                     const token = localStorage.getItem("token");
