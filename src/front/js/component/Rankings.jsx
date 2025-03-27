@@ -8,25 +8,35 @@ const Rankings = () => {
     const { modalidad } = useParams();
     const modalidadUpper = modalidad ? modalidad.toUpperCase() : "";
     const [torneoSeleccionado, setTorneoSeleccionado] = useState(null);
+    const [loadingTablas, setLoadingTablas] = useState(false);
 
     useEffect(() => {
         actions.getTorneosPorModalidad(modalidadUpper);
     }, [modalidadUpper]);
 
     useEffect(() => {
-        if (torneoSeleccionado && torneoSeleccionado.id) {
-            console.log("📌 Torneo seleccionado:", torneoSeleccionado);
-            actions.getTablaGoleadoresPorTorneo(torneoSeleccionado.id);
-            actions.getTablaAsistidoresPorTorneo(torneoSeleccionado.id);
-            actions.getTablaMvps();
-            actions.getTablaMenciones();
+        const cargarTablas = async () => {
+            if (torneoSeleccionado && torneoSeleccionado.id) {
+                setLoadingTablas(true);
+                console.log("📌 Torneo seleccionado:", torneoSeleccionado);
 
-            if (torneoSeleccionado.formato && torneoSeleccionado.formato !== "eliminacion_directa") {
-                actions.getTablaEquiposPorTorneo(torneoSeleccionado.id);
+                await Promise.all([
+                    actions.getTablaGoleadoresPorTorneo(torneoSeleccionado.id),
+                    actions.getTablaAsistidoresPorTorneo(torneoSeleccionado.id),
+                    actions.getTablaMvps(),
+                    actions.getTablaMenciones(),
+                    torneoSeleccionado.formato !== "eliminacion_directa"
+                        ? actions.getTablaEquiposPorTorneo(torneoSeleccionado.id)
+                        : null
+                ]);
+
+                setLoadingTablas(false);
+            } else {
+                console.warn("⚠️ No hay torneo seleccionado, no se pueden cargar las tablas.");
             }
-        } else {
-            console.warn("⚠️ No hay torneo seleccionado, no se pueden cargar las tablas.");
-        }
+        };
+
+        cargarTablas();
     }, [torneoSeleccionado]);
 
     return (
@@ -34,7 +44,7 @@ const Rankings = () => {
             <h2>Rankings de {modalidadUpper}</h2>
 
             {/* Selector de Torneo */}
-            <select 
+            <select
                 onChange={(e) => {
                     const torneo = store.torneos.find(t => t.id == e.target.value);
                     setTorneoSeleccionado(torneo);
@@ -43,19 +53,24 @@ const Rankings = () => {
             >
                 <option value="">Selecciona un Torneo</option>
                 {store.torneos
-                    .filter(t => t.modalidad.toUpperCase() === modalidadUpper) // 🔥 Filtrar torneos por modalidad
+                    .filter(t => t.modalidad.toUpperCase() === modalidadUpper)
                     .map(torneo => (
                         <option key={torneo.id} value={torneo.id}>{torneo.nombre}</option>
                     ))
                 }
             </select>
 
-            {torneoSeleccionado ? (
+            {loadingTablas ? (
+                <div className="spinner-wrapper">
+                    <div className="spinner"></div>
+                    <p className="spinner-text">Cargando datos del torneo...</p>
+                </div>
+            ) : torneoSeleccionado ? (
                 <>
                     <div className="rankings-wrapper">
 
-                        {/* 🔥 Tabla de Equipos con diseño mejorado */}
-                        {torneoSeleccionado.formato && torneoSeleccionado.formato !== "eliminacion_directa" && (
+                        {/* Tabla de Equipos */}
+                        {torneoSeleccionado.formato !== "eliminacion_directa" && (
                             <>
                                 <h3>Tabla de Equipos</h3>
                                 <div className="rankings-table-container">
@@ -88,6 +103,7 @@ const Rankings = () => {
                             </>
                         )}
                     </div>
+
                     {/* Tabla de Goleadores */}
                     <h3>Máximos Goleadores</h3>
                     <table className="rankings-table">
@@ -113,8 +129,6 @@ const Rankings = () => {
                             ))}
                         </tbody>
                     </table>
-
-                    {/* 🔥 Mostrar tabla de equipos solo si el formato NO es eliminacion_directa */}
 
                     {/* Tabla de MVPs */}
                     <h3>Jugadores con más MVPs</h3>

@@ -41,7 +41,9 @@ def add_new_player():
         return jsonify({"error": "Todos los datos tienen que estar completos"}), 400
 
     if not is_valid_password(body["password"]):
-        return jsonify({"error": "La contraseña debe contener al menos una letra, un número y ser de 6 caracteres o más"}), 400
+        return jsonify({
+            "error": "La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número."
+        }), 400
 
     email, name, password, nickhabbo = [body[field] for field in required_fields]
 
@@ -1038,6 +1040,18 @@ def aceptar_oferta():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": "Error interno del servidor"}), 500
+
+@api.route("/jugador/eliminar_convocatoria/<int:convocatoria_id>", methods=["DELETE"])
+def eliminar_convocatoria(convocatoria_id):
+    convocatoria = Convocatoria.query.get(convocatoria_id)
+
+    if not convocatoria:
+        return jsonify({"error": "Convocatoria no encontrada"}), 404
+
+    db.session.delete(convocatoria)
+    db.session.commit()
+
+    return jsonify({"mensaje": "Convocatoria eliminada con éxito"}), 200        
 
 
 @api.route("/equipos/dt/<int:dt_id>", methods=["GET"])

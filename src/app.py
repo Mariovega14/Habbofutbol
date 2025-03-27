@@ -26,11 +26,9 @@ static_file_dir = os.path.join(os.path.dirname(
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 
-app = Flask(__name__)
-
 CORS(app, resources={r"/api/*": {"origins": ["https://habbofutbol.com", "https://www.habbofutbol.com"]}})
 
-
+app.config['MAX_CONTENT_LENGTH'] = 4 * 1024 * 1024  # 10MB
 
 limiter.init_app(app)
 

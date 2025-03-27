@@ -46,36 +46,39 @@ const getState = ({ getStore, getActions, setStore }) => {
                     if (!playerData.name || !playerData.email || !playerData.password || !playerData.nickhabbo) {
                         return { success: false, message: "Todos los campos son obligatorios" };
                     }
-
-                    // 2️⃣ Validar que la contraseña tenga letras y números
-                    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+            
+                    // 2️⃣ Validar contraseña: 8 caracteres, mayúscula, minúscula, número
+                    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
                     if (!passwordRegex.test(playerData.password)) {
-                        return { success: false, message: "La contraseña debe tener al menos 6 caracteres, incluyendo letras y números" };
+                        return {
+                            success: false,
+                            message: "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número"
+                        };
                     }
-
-                    // 3️⃣ Enviar la solicitud al backend
+            
+                    // 3️⃣ Enviar solicitud al backend
                     const response = await fetch(`${process.env.BACKEND_URL}/register`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(playerData),
                     });
-
+            
                     const data = await response.json();
                     console.log("Respuesta del backend:", data);
-
-
+            
                     if (!response.ok) {
-                        console.error("Error en register:", data.message);
-                        return { success: false, message: data.message || "Error desconocido" };
+                        console.error("Error en register:", data.error);
+                        return { success: false, message: data.error || "Error desconocido" };
                     }
-
+            
                     return { success: true, message: "¡Registro exitoso! Redirigiendo..." };
-
+            
                 } catch (error) {
                     console.error("Error en register:", error);
                     return { success: false, message: "Error de conexión con el servidor" };
                 }
             },
+            
 
 
             crearTorneo: async (nombre, modalidad, formato) => {
@@ -883,6 +886,26 @@ const getState = ({ getStore, getActions, setStore }) => {
                     return { success: false, message: error.message };
                 }
             },
+
+            eliminarConvocatoria: async (convocatoriaId, modalidad) => {
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/jugador/eliminar_convocatoria/${convocatoriaId}`, {
+                        method: "DELETE"
+                    });
+            
+                    const data = await response.json();
+            
+                    if (!response.ok) {
+                        throw new Error(data.error || "Error al eliminar la convocatoria");
+                    }
+            
+                    alert("Convocatoria eliminada con éxito.");
+                    getActions().getConvocatorias(modalidad); // Recargar después de eliminar
+                } catch (error) {
+                    alert(error.message); // Mostrar mensaje de error
+                }
+            },
+            
 
             getEquiposPorDT: async (dtId) => {
                 try {
