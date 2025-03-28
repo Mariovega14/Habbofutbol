@@ -105,7 +105,14 @@ const ConvocatoriasYOfertas = () => {
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-    if (loading) return <p className="habbo-loading">Cargando...</p>;
+    if (loading) {
+        return (
+            <p className="habbo-loading">
+                {jugadorId ? "Cargando..." : "Debe iniciar sesión para ver este apartado..."}
+            </p>
+        );
+    }
+
 
     return (
         <div className="habbo-convocatorias-container">
