@@ -70,7 +70,6 @@ def add_new_player():
 
 @api.route('/jugadores/noregistrados', methods=['POST'])
 @jwt_required()
-@token_required
 def crear_jugador_admin():
     """Permite al administrador registrar un jugador con un NickHabbo"""
     usuario_actual_id = get_jwt_identity()
@@ -150,7 +149,6 @@ def get_jugadores_por_equipo(equipo_id):
     
 @api.route('/players/add_team', methods=['POST'])
 @jwt_required()
-@token_required
 def add_player_to_team():
     """Añadir un jugador a un equipo con la modalidad del torneo, evitando duplicados"""
     data = request.json
@@ -182,7 +180,6 @@ def add_player_to_team():
 
 @api.route("/remove_team", methods=["DELETE"])
 @jwt_required()
-@token_required
 def remove_team():
     """Solo los Admins pueden eliminar jugadores de un equipo"""
     try:
@@ -253,7 +250,6 @@ def modificar_jugador(id):
     
 @api.route('/jugadores/<int:id>', methods=['DELETE'])
 @jwt_required()
-@token_required
 def eliminar_jugador(id):
     usuario_actual_id = get_jwt_identity()  # Obtiene el ID del usuario autenticado
     admin = Jugador.query.get(usuario_actual_id)  # Verifica si es administrador
@@ -349,7 +345,6 @@ def obtener_asistencias():
 
 @api.route('/torneos', methods=['POST'])
 @jwt_required()
-@token_required
 def crear_torneo():
     """Solo los Admins pueden crear torneos"""
     try:
@@ -414,7 +409,6 @@ def obtener_torneos():
 
 @api.route('/equipos', methods=['POST'])
 @jwt_required()
-@token_required
 def crear_equipo():
     """Solo los Admins pueden crear equipos"""
     try:
@@ -494,7 +488,6 @@ def obtener_equipos_con_logo():
 
 @api.route('/equipos/<int:equipo_id>', methods=['DELETE'])
 @jwt_required()
-@token_required
 def eliminar_equipo(equipo_id):
     """Solo los Admins pueden eliminar equipos"""
     try:
@@ -522,7 +515,6 @@ def eliminar_equipo(equipo_id):
 
 @api.route('/torneos/<int:torneo_id>', methods=['DELETE'])
 @jwt_required()
-@token_required
 def eliminar_torneo(torneo_id):
     """Solo los Admins pueden eliminar torneos"""
     try:
@@ -553,7 +545,6 @@ def eliminar_torneo(torneo_id):
 
 @api.route('/partidos', methods=['POST'])
 @jwt_required()
-@token_required
 def registrar_partido():
     """Registrar un partido (Solo Admins o Árbitros)"""
     try:
@@ -721,7 +712,6 @@ def obtener_partidos():
 
 @api.route('/players/<int:jugador_id>/remove-team/<int:equipo_id>', methods=['PUT'])
 @jwt_required()
-@token_required
 def remove_team_from_player(jugador_id, equipo_id):
     """Permite al administrador quitar a un jugador de un equipo específico"""
     current_user_id = get_jwt_identity()
@@ -885,7 +875,6 @@ def obtener_menciones():
 
 
 @api.route("/jugador/crear_convocatoria", methods=["POST"])
-@token_required
 def crear_convocatoria():
     data = request.get_json()
 
@@ -914,7 +903,6 @@ def crear_convocatoria():
 
 
 @api.route("/convocatorias/<string:modalidad>", methods=["GET"])
-@token_required
 def obtener_convocatorias(modalidad):
     convocatorias = db.session.query(
         Convocatoria.id,

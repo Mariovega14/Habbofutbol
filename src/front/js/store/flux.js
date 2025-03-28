@@ -784,12 +784,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 
             getConvocatorias: async (modalidad) => {
                 try {
-                    const { fetchWithAuth } = getActions(); // Obtener fetchWithAuth
+                    // Llamada al backend usando fetch sin autenticación
+                    const response = await fetch(`${process.env.BACKEND_URL}/convocatorias/${modalidad}`);
 
-                    // Llamada al backend con fetchWithAuth, el cual ya maneja la verificación del token
-                    const data = await fetchWithAuth(`${process.env.BACKEND_URL}/convocatorias/${modalidad}`);
+                    if (!response.ok) throw new Error("Error al obtener convocatorias");
 
-                    if (!data) throw new Error("Error al obtener convocatorias");
+                    const data = await response.json();
 
                     // Si la respuesta es válida, actualizamos el store con las convocatorias
                     setStore({ convocatorias: data });
@@ -801,22 +801,23 @@ const getState = ({ getStore, getActions, setStore }) => {
             },
 
 
+
             crearConvocatoria: async (jugadorId, mensaje, modalidad) => {
                 try {
-                    const { fetchWithAuth } = getActions(); // 🔹 Acceder a fetchWithAuth correctamente
-
-                    const data = await fetchWithAuth(`${process.env.BACKEND_URL}/jugador/crear_convocatoria`, {
+                    // Llamada al backend usando fetch sin autenticación
+                    const response = await fetch(`${process.env.BACKEND_URL}/jugador/crear_convocatoria`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ jugador_id: jugadorId, mensaje, modalidad })
                     });
 
-                    if (!data) throw new Error("Error al crear la convocatoria");
+                    if (!response.ok) throw new Error("Error al crear la convocatoria");
+
+                    const data = await response.json();
 
                     alert("Convocatoria creada con éxito.");
-                    getActions().getConvocatorias(modalidad); // 🔹 Recargar convocatorias
+                    getActions().getConvocatorias(modalidad); // Recargar convocatorias
                     return { success: true };
-
                 } catch (error) {
                     console.error("❌ Error en crearConvocatoria:", error);
                     return { success: false };
