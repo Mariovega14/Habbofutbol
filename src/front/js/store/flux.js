@@ -965,7 +965,7 @@ const getState = ({ getStore, getActions, setStore }) => {
             updatePlayerRole: async (playerId, newRole) => {
                 try {
                     const token = localStorage.getItem("token");
-                    const response = await fetch(`${process.env.BACKEND_URL}/jugadores/rol`, { // 🔥 URL corregida
+                    const response = await fetch(`${process.env.BACKEND_URL}/jugadores/roles`, { // 🔥 URL corregida
                         method: "PUT",
                         headers: {
                             "Content-Type": "application/json",

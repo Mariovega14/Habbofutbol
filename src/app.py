@@ -76,7 +76,6 @@ def handle_invalid_usage(error):
 
 
 
-
 @app.route('/')
 def sitemap():
     # Obtener el token de la cabecera de la solicitud

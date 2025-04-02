@@ -38,7 +38,12 @@ const Resumenes = () => {
     );
 
     if (loading) {
-        return <p className="loading-text">Cargando partidos...</p>;
+        return (
+            <div className="loading-container">
+                <div className="spinner"></div>
+                <p className="loading-text">Cargando partidos...</p>
+            </div>
+        );
     }
 
     return (

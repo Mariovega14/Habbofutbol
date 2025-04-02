@@ -1080,7 +1080,7 @@ def get_equipos_por_dt(dt_id):
     
 
 
-@api.route("/jugadores/rol", methods=["PUT"])
+@api.route("/jugadores/roles", methods=["PUT"])
 @jwt_required()
 def gestionar_rol():
     """Permite a Superadmin cambiar roles de Admins y a Admins asignar roles a Jugadores, Árbitros y DTs"""
