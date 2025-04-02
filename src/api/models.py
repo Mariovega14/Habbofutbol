@@ -12,12 +12,24 @@ db = SQLAlchemy()
 # 🔹 Modelo intermedio para la relación Many-to-Many (Jugador - Equipo)
 class JugadorEquipo(db.Model):
     __tablename__ = "jugadores_equipos"
-    jugador_id = db.Column(db.Integer, db.ForeignKey("jugadores.id"), primary_key=True)
-    equipo_id = db.Column(db.Integer, db.ForeignKey("equipos.id"), primary_key=True)
+
+    jugador_id = db.Column(
+        db.Integer,
+        db.ForeignKey("jugadores.id", ondelete="CASCADE"),
+        primary_key=True
+    )
+
+    equipo_id = db.Column(
+        db.Integer,
+        db.ForeignKey("equipos.id", ondelete="CASCADE"),
+        primary_key=True
+    )
+
     modalidad = db.Column(db.String(50), nullable=False)
 
     jugador = db.relationship("Jugador", back_populates="jugadores_equipos")
     equipo = db.relationship("Equipo", back_populates="jugadores_equipos")
+
 
 # 🔹 Modelo de Formatos de Torneo
 class FormatoTorneo(db.Model):
@@ -163,12 +175,20 @@ class Oferta(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     dt_id = db.Column(db.Integer, db.ForeignKey("jugadores.id"), nullable=False)
     jugador_id = db.Column(db.Integer, db.ForeignKey("jugadores.id"), nullable=False)
-    equipo_id = db.Column(db.Integer, db.ForeignKey("equipos.id"), nullable=False)
+    equipo_id = db.Column(
+        db.Integer,
+        db.ForeignKey("equipos.id", ondelete="CASCADE"),
+        nullable=False
+    )
     created_at = db.Column(db.DateTime, default=db.func.now())
 
     dt = db.relationship("Jugador", foreign_keys=[dt_id])
     jugador = db.relationship("Jugador", foreign_keys=[jugador_id])
-    equipo = db.relationship("Equipo", backref="ofertas")    
+    equipo = db.relationship(
+        "Equipo",
+        backref=db.backref("ofertas", cascade="all, delete-orphan", passive_deletes=True)
+    )
+
 
 class Noticia(db.Model):
     id = db.Column(db.Integer, primary_key=True)
