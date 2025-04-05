@@ -848,25 +848,26 @@ def obtener_asistidores_por_torneo(torneo_id):
     return jsonify(asistidores), 200
 
 
-@api.route('/tablas/mvps', methods=['GET'])
-def obtener_mvps():
-    """Obtener jugadores con más MVPs"""
+@api.route('/tablas/mvps/<int:modalidad_id>', methods=['GET'])
+def obtener_mvps_por_modalidad(modalidad_id):
     jugadores_mvp = db.session.query(
         Jugador.id, Jugador.nickhabbo, db.func.count(Partido.mvp_id).label("total_mvps")
-    ).join(Partido, Jugador.id == Partido.mvp_id).group_by(Jugador.id).order_by(db.desc("total_mvps")).all()
+    ).join(Partido, Jugador.id == Partido.mvp_id).filter(
+        Partido.modalidad_id == modalidad_id  # 🔹 Filtrar por modalidad
+    ).group_by(Jugador.id).order_by(db.desc("total_mvps")).all()
 
     mvps = [{"id": j[0], "nickhabbo": j[1], "mvps": j[2]} for j in jugadores_mvp]
 
     return jsonify(mvps), 200
 
 
-@api.route('/tablas/menciones', methods=['GET'])
-def obtener_menciones():
-    """Obtener jugadores con más menciones especiales"""
+@api.route('/tablas/menciones/<int:modalidad_id>', methods=['GET'])
+def obtener_menciones_por_modalidad(modalidad_id):
     jugadores_mencion = db.session.query(
         Jugador.id, Jugador.nickhabbo, db.func.count().label("total_menciones")
     ).filter(
-        (Jugador.id == Partido.mencion_equipo_a_id) | (Jugador.id == Partido.mencion_equipo_b_id)
+        ((Jugador.id == Partido.mencion_equipo_a_id) | (Jugador.id == Partido.mencion_equipo_b_id)) & 
+        (Partido.modalidad_id == modalidad_id)  # 🔹 Filtrar por modalidad
     ).group_by(Jugador.id).order_by(db.desc("total_menciones")).all()
 
     menciones = [{"id": j[0], "nickhabbo": j[1], "menciones": j[2]} for j in jugadores_mencion]
