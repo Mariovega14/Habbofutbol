@@ -72,11 +72,7 @@ Vercel (frontend)
 Instalación
 
 Clona el repositorio: git clone https://github.com/dserodio?tab=repositories
-Instala las dependencias del backend: pip install -r requirements.txt
-Instala las dependencias del frontend: npm install
-Configura la base de datos en Railway y las variables de entorno para EC2 AWS y Vercel.
-Despliega el backend en EC2 AWS: sigue las instrucciones de configuración de AWS.
-Despliega el frontend en Vercel: sigue las instrucciones de configuración de Vercel.
+
 Uso
 Accede a la aplicación a través de tu navegador con
 https://www.habbofutbol.com
