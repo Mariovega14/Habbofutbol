@@ -13,6 +13,7 @@ import cloudinary.uploader
 from cloudinary.uploader import upload
 from datetime import datetime, timedelta
 from extensions import limiter
+from auth import token_required
 
 api = Blueprint('api', __name__)
 
@@ -41,7 +42,9 @@ def add_new_player():
         return jsonify({"error": "Todos los datos tienen que estar completos"}), 400
 
     if not is_valid_password(body["password"]):
-        return jsonify({"error": "La contraseña debe contener al menos una letra, un número y ser de 6 caracteres o más"}), 400
+        return jsonify({
+            "error": "La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número."
+        }), 400
 
     email, name, password, nickhabbo = [body[field] for field in required_fields]
 
@@ -847,28 +850,28 @@ def obtener_asistidores_por_torneo(torneo_id):
 
 @api.route('/tablas/mvps', methods=['GET'])
 def obtener_mvps():
-    """Obtener jugadores con más MVPs"""
-    jugadores_mvp = db.session.query(
-        Jugador.id, Jugador.nickhabbo, db.func.count(Partido.mvp_id).label("total_mvps")
-    ).join(Partido, Jugador.id == Partido.mvp_id).group_by(Jugador.id).order_by(db.desc("total_mvps")).all()
-
-    mvps = [{"id": j[0], "nickhabbo": j[1], "mvps": j[2]} for j in jugadores_mvp]
-
-    return jsonify(mvps), 200
-
-
+     """Obtener jugadores con más MVPs"""
+     jugadores_mvp = db.session.query(
+         Jugador.id, Jugador.nickhabbo, db.func.count(Partido.mvp_id).label("total_mvps")
+     ).join(Partido, Jugador.id == Partido.mvp_id).group_by(Jugador.id).order_by(db.desc("total_mvps")).all()
+ 
+     mvps = [{"id": j[0], "nickhabbo": j[1], "mvps": j[2]} for j in jugadores_mvp]
+ 
+     return jsonify(mvps), 200
+ 
+ 
 @api.route('/tablas/menciones', methods=['GET'])
 def obtener_menciones():
-    """Obtener jugadores con más menciones especiales"""
-    jugadores_mencion = db.session.query(
-        Jugador.id, Jugador.nickhabbo, db.func.count().label("total_menciones")
-    ).filter(
-        (Jugador.id == Partido.mencion_equipo_a_id) | (Jugador.id == Partido.mencion_equipo_b_id)
-    ).group_by(Jugador.id).order_by(db.desc("total_menciones")).all()
-
-    menciones = [{"id": j[0], "nickhabbo": j[1], "menciones": j[2]} for j in jugadores_mencion]
-
-    return jsonify(menciones), 200
+     """Obtener jugadores con más menciones especiales"""
+     jugadores_mencion = db.session.query(
+         Jugador.id, Jugador.nickhabbo, db.func.count().label("total_menciones")
+     ).filter(
+         (Jugador.id == Partido.mencion_equipo_a_id) | (Jugador.id == Partido.mencion_equipo_b_id)
+     ).group_by(Jugador.id).order_by(db.desc("total_menciones")).all()
+ 
+     menciones = [{"id": j[0], "nickhabbo": j[1], "menciones": j[2]} for j in jugadores_mencion]
+ 
+     return jsonify(menciones), 200
 
 
 @api.route("/jugador/crear_convocatoria", methods=["POST"])
@@ -1039,6 +1042,18 @@ def aceptar_oferta():
         db.session.rollback()
         return jsonify({"error": "Error interno del servidor"}), 500
 
+@api.route("/jugador/eliminar_convocatoria/<int:convocatoria_id>", methods=["DELETE"])
+def eliminar_convocatoria(convocatoria_id):
+    convocatoria = Convocatoria.query.get(convocatoria_id)
+
+    if not convocatoria:
+        return jsonify({"error": "Convocatoria no encontrada"}), 404
+
+    db.session.delete(convocatoria)
+    db.session.commit()
+
+    return jsonify({"mensaje": "Convocatoria eliminada con éxito"}), 200        
+
 
 @api.route("/equipos/dt/<int:dt_id>", methods=["GET"])
 @jwt_required()  # Asegura que el DT esté autenticado
@@ -1065,7 +1080,7 @@ def get_equipos_por_dt(dt_id):
     
 
 
-@api.route("/jugadores/rol", methods=["PUT"])
+@api.route("/jugadores/roles", methods=["PUT"])
 @jwt_required()
 def gestionar_rol():
     """Permite a Superadmin cambiar roles de Admins y a Admins asignar roles a Jugadores, Árbitros y DTs"""

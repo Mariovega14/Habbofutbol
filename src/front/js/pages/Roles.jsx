@@ -22,7 +22,7 @@ const PlayersWithRoles = () => {
         }
     }, [store.playersWithRoles]);
 
-    const rolesDisponibles = ["jugador", "árbitro", "dt", "admin"];
+    const rolesDisponibles = ["jugador", "arbitro", "dt", "admin"];
 
     const handleRoleChange = (playerId, newRole) => {
         setRoles({ ...roles, [playerId]: newRole });

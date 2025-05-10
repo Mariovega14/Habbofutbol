@@ -47,13 +47,16 @@ const getState = ({ getStore, getActions, setStore }) => {
                         return { success: false, message: "Todos los campos son obligatorios" };
                     }
 
-                    // 2️⃣ Validar que la contraseña tenga letras y números
-                    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+                    // 2️⃣ Validar contraseña: 8 caracteres, mayúscula, minúscula, número
+                    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
                     if (!passwordRegex.test(playerData.password)) {
-                        return { success: false, message: "La contraseña debe tener al menos 6 caracteres, incluyendo letras y números" };
+                        return {
+                            success: false,
+                            message: "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número"
+                        };
                     }
 
-                    // 3️⃣ Enviar la solicitud al backend
+                    // 3️⃣ Enviar solicitud al backend
                     const response = await fetch(`${process.env.BACKEND_URL}/register`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -63,10 +66,9 @@ const getState = ({ getStore, getActions, setStore }) => {
                     const data = await response.json();
                     console.log("Respuesta del backend:", data);
 
-
                     if (!response.ok) {
-                        console.error("Error en register:", data.message);
-                        return { success: false, message: data.message || "Error desconocido" };
+                        console.error("Error en register:", data.error);
+                        return { success: false, message: data.error || "Error desconocido" };
                     }
 
                     return { success: true, message: "¡Registro exitoso! Redirigiendo..." };
@@ -78,15 +80,16 @@ const getState = ({ getStore, getActions, setStore }) => {
             },
 
 
+
             crearTorneo: async (nombre, modalidad, formato) => {
                 const store = getStore();
-            
+
                 // 🚨 Validar que el usuario sea admin antes de hacer la solicitud
                 if (store.role !== "admin") {
                     console.error("Acceso denegado: el usuario no es administrador");
                     return { success: false, message: "No tienes permisos para crear un torneo" };
                 }
-            
+
                 try {
                     const response = await secureFetch(`${process.env.BACKEND_URL}/torneos`, {
                         method: "POST",
@@ -96,9 +99,9 @@ const getState = ({ getStore, getActions, setStore }) => {
                         },
                         body: JSON.stringify({ nombre, modalidad, formato }),
                     });
-            
+
                     const data = await response.json(); // Obtener respuesta en JSON
-            
+
                     if (response.ok) {
                         await getActions().getTorneos(); // Refrescar la lista de torneos
                         return { success: true, message: "Torneo creado exitosamente" };
@@ -196,12 +199,16 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 
             logout: () => {
-                localStorage.clear(); 
+                localStorage.clear(); // ✅ Borra todo lo almacenado
+
                 setStore({ token: null, role: null, jugadorId: null });
-            
+
                 // Redirigir al usuario al login
-                window.location.replace("/login"); 
+                setTimeout(() => {
+                    window.location.replace("/login");
+                }, 500);
             },
+
 
             // 📌 Obtener asistencias
             obtenerAsistencias: async () => {
@@ -325,29 +332,29 @@ const getState = ({ getStore, getActions, setStore }) => {
                     if (datos.logo) {
                         formData.append("logo", datos.logo);
                     }
-            
+
                     const token = localStorage.getItem("token");
-            
+
                     if (!token) {
                         return { success: false, message: "No tienes una sesión activa" };
                     }
-            
+
                     const resp = await secureFetch(`${process.env.BACKEND_URL}/equipos`, {
                         method: "POST",
                         headers: {
-                            "Authorization": `Bearer ${token}`, 
+                            "Authorization": `Bearer ${token}`,
                         },
                         body: formData,
                     });
-            
+
                     const data = await resp.json();
                     return { success: resp.ok, message: data.message || data.error };
-            
+
                 } catch (error) {
                     return { success: false, message: "Error al conectar con el servidor" };
                 }
             },
-                
+
             getEquiposConLogo: async () => {
                 try {
                     const resp = await fetch(`${process.env.BACKEND_URL}/equipos-con-logo`);
@@ -384,12 +391,12 @@ const getState = ({ getStore, getActions, setStore }) => {
                 try {
                     // 🔹 Obtener el token del usuario desde localStorage (o donde lo almacenes)
                     const token = localStorage.getItem("token");
-            
+
                     if (!token) {
                         console.error("No tienes una sesión activa");
                         return false;
                     }
-            
+
                     const response = await secureFetch(`${process.env.BACKEND_URL}/equipos/${equipoId}`, {
                         method: 'DELETE',
                         headers: {
@@ -397,11 +404,11 @@ const getState = ({ getStore, getActions, setStore }) => {
                             'Authorization': `Bearer ${token}`  // ✅ Agregamos el token aquí
                         },
                     });
-            
+
                     if (!response.ok) {
                         throw new Error('Error al eliminar el equipo');
                     }
-            
+
                     return true;
                 } catch (error) {
                     console.error('Error:', error);
@@ -412,15 +419,15 @@ const getState = ({ getStore, getActions, setStore }) => {
             removePlayerFromTeam: async (playerId, teamId) => {
                 try {
                     console.log("Intentando eliminar jugador del equipo:", { playerId, teamId }); // 🛠 Depuración
-            
+
                     // 🔹 Obtener el token del usuario desde localStorage (o donde lo almacenes)
                     const token = localStorage.getItem("token");
-            
+
                     if (!token) {
                         console.error("No tienes una sesión activa");
                         return { success: false, message: "No tienes una sesión activa" };
                     }
-            
+
                     const response = await secureFetch(process.env.BACKEND_URL + "/remove_team", {
                         method: "DELETE",
                         headers: {
@@ -429,12 +436,12 @@ const getState = ({ getStore, getActions, setStore }) => {
                         },
                         body: JSON.stringify({ player_id: playerId, team_id: teamId })
                     });
-            
+
                     if (!response.ok) throw new Error("Error al eliminar el jugador del equipo.");
-            
+
                     const data = await response.json();
                     console.log("Jugador eliminado:", data); // 🛠 Depuración
-            
+
                     getActions().getJugadores(); // Actualiza la lista de jugadores
                     return { success: true, data };
                 } catch (error) {
@@ -442,7 +449,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     return { success: false, message: "Error al eliminar el jugador del equipo." };
                 }
             },
-            
+
 
 
 
@@ -777,67 +784,67 @@ const getState = ({ getStore, getActions, setStore }) => {
 
             getConvocatorias: async (modalidad) => {
                 try {
+                    // Llamada al backend usando fetch sin autenticación
                     const response = await fetch(`${process.env.BACKEND_URL}/convocatorias/${modalidad}`);
-                    const data = await response.json();
 
                     if (!response.ok) throw new Error("Error al obtener convocatorias");
 
-                    setStore({ convocatorias: data }); // Guardamos las convocatorias en el store
+                    const data = await response.json();
+
+                    // Si la respuesta es válida, actualizamos el store con las convocatorias
+                    setStore({ convocatorias: data });
                 } catch (error) {
-                    alert("Hubo un problema al obtener las convocatorias. Inténtalo de nuevo más tarde.");
+                    console.error("❌ Error en getConvocatorias:", error);
+                    // Si hay error (por ejemplo, token expirado o problema con la API), limpiamos el store de convocatorias
+                    setStore({ convocatorias: [] });
                 }
             },
+
+
 
             crearConvocatoria: async (jugadorId, mensaje, modalidad) => {
                 try {
+                    // Llamada al backend usando fetch sin autenticación
                     const response = await fetch(`${process.env.BACKEND_URL}/jugador/crear_convocatoria`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            jugador_id: jugadorId,
-                            mensaje,
-                            modalidad
-                        }),
+                        body: JSON.stringify({ jugador_id: jugadorId, mensaje, modalidad })
                     });
+
+                    if (!response.ok) throw new Error("Error al crear la convocatoria");
 
                     const data = await response.json();
 
-                    if (!response.ok) {
-                        throw new Error(data.error || "Error al crear la convocatoria");
-                    }
-
                     alert("Convocatoria creada con éxito.");
-                    getActions().getConvocatorias(modalidad); // Recargar convocatorias de la modalidad actual
+                    getActions().getConvocatorias(modalidad); // Recargar convocatorias
+                    return { success: true };
                 } catch (error) {
-                    alert(error.message); // Mostrar mensaje de error al usuario
+                    console.error("❌ Error en crearConvocatoria:", error);
+                    return { success: false };
                 }
             },
 
+
+
             getOfertas: async (jugadorId, modalidad) => {
                 try {
-                    if (!jugadorId || !modalidad) {
-                        throw new Error("Datos incompletos. No se pueden obtener las ofertas.");
-                    }
+                    if (!jugadorId || !modalidad) return { success: false };
 
                     const response = await fetch(`${process.env.BACKEND_URL}/jugador/${jugadorId}/ofertas/${modalidad}`);
                     const data = await response.json();
 
-                    if (!response.ok) {
-                        throw new Error(data.error || "Error al obtener ofertas");
-                    }
+                    if (!response.ok) throw new Error(data.error || "Error al obtener ofertas");
 
                     setStore({ ofertas: data });
                 } catch (error) {
-                    alert(error.message); // Mostrar mensaje de error al usuario
-                    setStore({ ofertas: [] }); // Limpiar ofertas en caso de error
+                    setStore({ ofertas: [] }); // Limpiar en caso de error
+                    return { success: false };
                 }
             },
 
             enviarOferta: async (dtId, jugadorId, equipoId) => {
                 try {
-                    if (!dtId || !jugadorId || !equipoId) {
-                        throw new Error("Faltan datos obligatorios para enviar la oferta.");
-                    }
+                    if (!dtId || !jugadorId || !equipoId) return { success: false };
 
                     const response = await fetch(process.env.BACKEND_URL + "/dt/ofertar", {
                         method: "POST",
@@ -847,15 +854,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 
                     const data = await response.json();
 
-                    if (data.error) {
-                        throw new Error(data.error);
-                    }
+                    if (!response.ok) throw new Error(data.error);
 
                     alert("Oferta enviada con éxito.");
-                    return data;
+                    return { success: true, data };
                 } catch (error) {
-                    alert(error.message); // Mostrar mensaje de error al usuario
-                    return { error: error.message };
+                    return { success: false };
                 }
             },
 
@@ -869,20 +873,37 @@ const getState = ({ getStore, getActions, setStore }) => {
 
                     const data = await response.json();
 
-                    if (!response.ok) {
-                        throw new Error(data.error || "Error al aceptar la oferta");
-                    }
+                    if (!response.ok) throw new Error(data.error || "Error al aceptar la oferta");
 
-                    // Recargar ofertas y convocatorias después de aceptar la oferta
+                    alert("Oferta aceptada correctamente.");
                     getActions().getOfertas(jugadorId, modalidad);
                     getActions().getConvocatorias(modalidad);
 
-                    return data;
+                    return { success: true, data };
                 } catch (error) {
-                    alert(error.message); // Mostrar mensaje de error al usuario
-                    return { success: false, message: error.message };
+                    return { success: false };
                 }
             },
+
+            eliminarConvocatoria: async (convocatoriaId, modalidad) => {
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/jugador/eliminar_convocatoria/${convocatoriaId}`, {
+                        method: "DELETE"
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.error || "Error al eliminar la convocatoria");
+                    }
+
+                    alert("Convocatoria eliminada con éxito.");
+                    getActions().getConvocatorias(modalidad); // Recargar después de eliminar
+                } catch (error) {
+                    alert(error.message); // Mostrar mensaje de error
+                }
+            },
+
 
             getEquiposPorDT: async (dtId) => {
                 try {
@@ -944,7 +965,7 @@ const getState = ({ getStore, getActions, setStore }) => {
             updatePlayerRole: async (playerId, newRole) => {
                 try {
                     const token = localStorage.getItem("token");
-                    const response = await fetch(`${process.env.BACKEND_URL}/jugadores/rol`, { // 🔥 URL corregida
+                    const response = await fetch(`${process.env.BACKEND_URL}/jugadores/roles`, { // 🔥 URL corregida
                         method: "PUT",
                         headers: {
                             "Content-Type": "application/json",
@@ -984,24 +1005,24 @@ const getState = ({ getStore, getActions, setStore }) => {
                     if (imagen) {
                         formData.append("imagen", imagen);
                     }
-            
+
                     const token = localStorage.getItem("token");
-            
+
                     if (!token) {
                         return { success: false, message: "No tienes una sesión activa" };
                     }
-            
+
                     const response = await fetch(`${process.env.BACKEND_URL}/noticias`, {
                         method: "POST",
                         headers: {
-                            "Authorization": `Bearer ${token}`, 
+                            "Authorization": `Bearer ${token}`,
                         },
                         body: formData,
                     });
-            
+
                     const data = await response.json();
                     return { success: response.ok, message: data.message || data.error, imagen_url: data.imagen_url };
-                    
+
                 } catch (error) {
                     return { success: false, message: "Error al conectar con el servidor" };
                 }
@@ -1042,6 +1063,40 @@ const getState = ({ getStore, getActions, setStore }) => {
                     console.error("Error al eliminar noticia:", error);
                 }
             },
+
+            fetchWithAuth: async (url, options = {}) => {
+                try {
+                    const token = localStorage.getItem("token");
+
+                    if (!token) {
+                        getActions().logout();
+                        return null;
+                    }
+
+                    options.headers = {
+                        ...options.headers,
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    };
+
+                    const response = await fetch(url, options);
+
+                    if (response.status === 401) {
+                        console.warn("🔹 Token expirado. Cerrando sesión...");
+                        getActions().logout();
+                        return null;
+                    }
+
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || "Error en la petición");
+
+                    return data;
+                } catch (error) {
+                    console.error("❌ Error en fetchWithAuth:", error);
+                    return null;
+                }
+            },
+
 
 
 

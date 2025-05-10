@@ -8,10 +8,13 @@ const EquiposModalidad = () => {
     const { modalidad } = useParams();
     const [equipoSeleccionado, setEquipoSeleccionado] = useState(null);
     const [jugadores, setJugadores] = useState([]);
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
-        actions.getEquiposConLogo(); // ✅ Cargar equipos con logos
-    }, []);
+        if (store.equipos.length === 0) {
+            actions.getEquiposConLogo();
+        }
+    }, [store.equipos]);
 
     const modalidadLower = modalidad ? modalidad.toLowerCase() : "";
 
@@ -23,6 +26,7 @@ const EquiposModalidad = () => {
         setEquipoSeleccionado(equipoId);
         const jugadoresData = await actions.getJugadoresPorEquipo(equipoId);
         setJugadores(jugadoresData);
+        setShowModal(true);
     };
 
     return (
@@ -30,9 +34,9 @@ const EquiposModalidad = () => {
             <h1 className="titulo">Equipos de la modalidad {modalidad}</h1>
             <ul className="equipos-lista">
                 {equiposFiltrados.map(equipo => (
-                    <li 
-                        key={equipo.id} 
-                        className={`equipo ${equipoSeleccionado === equipo.id ? "seleccionado" : ""}`}
+                    <li
+                        key={equipo.id}
+                        className="equipo"
                         onClick={() => handleClickEquipo(equipo.id)}
                     >
                         {equipo.logo_url && (
@@ -43,18 +47,28 @@ const EquiposModalidad = () => {
                 ))}
             </ul>
 
-            {equipoSeleccionado && (
-                <div className="jugadores-container">
-                    <h2>Jugadores del equipo seleccionado</h2>
-                    <ul className="jugadores-lista">
-                        {jugadores.length > 0 ? (
-                            jugadores.map(jugador => (
-                                <li key={jugador.id}>{jugador.nickhabbo}</li>
-                            ))
-                        ) : (
-                            <p>No hay jugadores en este equipo.</p>
-                        )}
-                    </ul>
+            {/* MODAL CORREGIDO */}
+            {showModal && (
+                <div className="modal modal-equipos show d-block" tabIndex="-1" role="dialog">
+                    <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title text-white">Jugadores del equipo</h5>
+                                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+                            </div>
+                            <div className="modal-body">
+                                <ul className="jugadores-lista">
+                                    {jugadores.length > 0 ? (
+                                        jugadores.map(jugador => (
+                                            <li key={jugador.id}>{jugador.nickhabbo}</li>
+                                        ))
+                                    ) : (
+                                        <p>No hay jugadores en este equipo.</p>
+                                    )}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

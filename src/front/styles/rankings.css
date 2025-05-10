@@ -3,12 +3,15 @@
     max-width: 1400px;
     margin: 20px auto;
     padding: 20px;
-    height: 85vh; /* 🔥 Fija altura para hacer scroll solo aquí */
-    overflow-y: auto; /* ✅ Habilitar scroll sin tocar el body */
+    height: 85vh;
+    /* 🔥 Fija altura para hacer scroll solo aquí */
+    overflow-y: auto;
+    /* ✅ Habilitar scroll sin tocar el body */
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: #111; /* 🔥 Negro más intenso */
+    background: #111;
+    /* 🔥 Negro más intenso */
     border-radius: 12px;
     box-shadow: 0px 8px 15px rgba(255, 255, 255, 0.1);
     color: white;
@@ -18,10 +21,12 @@
 .rankings-container h2 {
     font-size: 28px;
     font-weight: bold;
-    color: #fff; /* ✅ Texto blanco */
+    color: #fff;
+    /* ✅ Texto blanco */
     text-transform: uppercase;
     margin-bottom: 20px;
-    border-bottom: 3px solid #FFD700; /* 🏆 Oro */
+    border-bottom: 3px solid #FFD700;
+    /* 🏆 Oro */
     padding-bottom: 5px;
     text-align: center;
 }
@@ -32,7 +37,8 @@
     padding: 12px;
     margin-bottom: 20px;
     font-size: 16px;
-    border: 2px solid #FFD700; /* Oro */
+    border: 2px solid #FFD700;
+    /* Oro */
     background: #252525;
     color: #fff;
     border-radius: 8px;
@@ -56,11 +62,13 @@
 .rankings-table {
     width: 100%;
     border-collapse: collapse;
-    background: #1b1b1b; /* ✅ Negro elegante */
+    background: #1b1b1b;
+    /* ✅ Negro elegante */
     color: white;
     border-radius: 10px;
     overflow: hidden;
-    font-size: 18px; /* 🔥 Tamaño ideal */
+    font-size: 18px;
+    /* 🔥 Tamaño ideal */
 }
 
 /* 🔥 Encabezados */
@@ -69,7 +77,8 @@
     text-align: center;
     background: #222;
     font-weight: bold;
-    border-bottom: 3px solid #FFD700; /* 🏆 Oro */
+    border-bottom: 3px solid #FFD700;
+    /* 🏆 Oro */
     text-transform: uppercase;
     letter-spacing: 1px;
     color: #fff;
@@ -98,15 +107,18 @@
 /* 🌟 Destacar columna de puntos */
 .rankings-table .pts-column {
     font-weight: bold;
-    color: #FFD700; /* 🏆 Oro */
-    font-size: 22px; /* 🔥 Más grande */
+    color: #FFD700;
+    /* 🏆 Oro */
+    font-size: 22px;
+    /* 🔥 Más grande */
     text-shadow: 2px 2px 5px rgba(255, 215, 0, 0.6);
 }
 
 /* 🌟 Numeración de equipos */
 .rankings-table .team-rank {
     font-weight: bold;
-    color: #FFD700; /* Oro */
+    color: #FFD700;
+    /* Oro */
     font-size: 20px;
 }
 
@@ -122,6 +134,7 @@
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -132,7 +145,8 @@
 @media screen and (max-width: 768px) {
     .rankings-container {
         padding: 15px;
-        height: 80vh; /* ✅ Ajustar para móviles */
+        height: 80vh;
+        /* ✅ Ajustar para móviles */
     }
 
     .torneo-select {
@@ -141,13 +155,45 @@
         width: 80%;
     }
 
-    .rankings-table th, .rankings-table td {
+    .rankings-table th,
+    .rankings-table td {
         padding: 8px;
         font-size: 14px;
     }
 }
 
-.rankings-table:first-of-type {
-    border: 3px solid #FFD700; /* 🏆 Oro */
-    box-shadow: 0px 0px 15px rgba(255, 215, 0, 0.6);
+
+.spinner-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #3b82f6;
+    /* azul moderno */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+}
+
+.spinner-text {
+    font-size: 1rem;
+    color: #444;
+    font-weight: 500;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
